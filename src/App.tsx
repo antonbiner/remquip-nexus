@@ -16,6 +16,8 @@ import CheckoutPage from "@/pages/CheckoutPage";
 import OrderConfirmedPage from "@/pages/OrderConfirmedPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import CustomerDashboardPage from "@/pages/CustomerDashboardPage";
 import ContactPage from "@/pages/ContactPage";
 import LegalPage from "@/pages/LegalPage";
 import AdminOverview from "@/pages/admin/AdminOverview";
@@ -51,13 +53,15 @@ const App = () => (
                   <Route path="/order-confirmed" element={<OrderConfirmedPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/account" element={<CustomerDashboardPage />} />
                   <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/terms" element={<LegalPage title="Terms & Conditions"><p>These Terms and Conditions govern your use of the REMQUIP platform and purchase of products through our website. By placing an order, you agree to be bound by these terms.</p><p>All prices are listed in Canadian Dollars (CAD) unless otherwise specified. Prices are subject to change without notice. Orders are subject to acceptance and availability.</p><p>REMQUIP reserves the right to refuse or cancel any order at its discretion. Payment must be received in full before shipment of goods.</p><p>These terms shall be governed by and construed in accordance with the laws of the Province of Quebec, Canada.</p></LegalPage>} />
-                  <Route path="/privacy" element={<LegalPage title="Privacy Policy"><p>REMQUIP is committed to protecting your privacy. This policy outlines how we collect, use, and safeguard your personal information.</p><p>We collect information you provide directly, including name, email, shipping address, and payment information when placing orders. This information is used solely for order processing and customer service.</p><p>We do not sell, trade, or otherwise transfer your personal information to outside parties without your consent, except as required to fulfill your order.</p></LegalPage>} />
-                  <Route path="/shipping" element={<LegalPage title="Shipping & Returns"><p>REMQUIP ships across Canada and to select US destinations. Standard shipping is calculated at checkout based on weight and destination.</p><p>Orders over C$500 qualify for free shipping within Canada. Most orders ship within 1-2 business days from our Quebec warehouse.</p><p>Returns are accepted within 30 days of delivery for unused products in original packaging. A restocking fee of 15% may apply. Defective products are replaced at no charge.</p></LegalPage>} />
-                  <Route path="/refund" element={<LegalPage title="Refund Policy"><p>Refunds are processed within 5-10 business days after we receive the returned product. Refunds are issued to the original payment method.</p><p>Custom orders and special-order items are non-refundable. Shipping costs are non-refundable unless the return is due to our error.</p></LegalPage>} />
-                  <Route path="/cookie" element={<LegalPage title="Cookie Policy"><p>REMQUIP uses cookies to enhance your browsing experience. Cookies are small text files stored on your device that help us remember your preferences.</p><p>We use essential cookies for site functionality and analytics cookies to understand how visitors use our site. You can control cookie settings through your browser.</p></LegalPage>} />
-                  <Route path="/about" element={<LegalPage title="About REMQUIP"><p>REMQUIP is Canada's next-generation heavy-duty parts distributor, based in Quebec City and serving fleets, distributors, and OEMs nationwide since 2025.</p><p>We specialize in heavy-duty brakes and air suspension components for commercial trucks and trailers. Our commitment to quality, competitive pricing, and fast shipping sets us apart.</p><p>With 15+ years of combined industry experience, our team understands the demands of the heavy-duty transportation industry and delivers the parts you need, when you need them.</p></LegalPage>} />
+                  <Route path="/terms" element={<LegalPage titleKey="legal.terms.title" contentKey="legal.terms.content" />} />
+                  <Route path="/privacy" element={<LegalPage titleKey="legal.privacy.title" contentKey="legal.privacy.content" />} />
+                  <Route path="/shipping" element={<LegalPage titleKey="legal.shipping.title" contentKey="legal.shipping.content" />} />
+                  <Route path="/refund" element={<LegalPage titleKey="legal.refund.title" contentKey="legal.refund.content" />} />
+                  <Route path="/cookie" element={<LegalPage titleKey="legal.cookie.title" contentKey="legal.cookie.content" />} />
+                  <Route path="/about" element={<LegalPage titleKey="legal.about.title" contentKey="legal.about.content" />} />
                 </Route>
 
                 {/* Admin */}

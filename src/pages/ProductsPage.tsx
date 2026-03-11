@@ -22,7 +22,7 @@ export default function ProductsPage() {
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <nav className="text-sm text-muted-foreground mb-4">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+        <Link to="/" className="hover:text-foreground transition-colors">{t("nav.home")}</Link>
         <span className="mx-2">/</span>
         <span className="text-foreground">{pageTitle}</span>
       </nav>
@@ -39,7 +39,7 @@ export default function ProductsPage() {
                 <li key={cat.id}>
                   <Link
                     to={`/products/${cat.slug}`}
-                    className={`text-sm ${cat.slug === categorySlug ? "text-accent font-medium" : "text-muted-foreground hover:text-foreground"} transition-colors`}
+                    className={`text-sm transition-colors ${cat.slug === categorySlug ? "text-accent font-medium" : "text-muted-foreground hover:text-foreground"}`}
                   >
                     {t(cat.translationKey)}
                   </Link>
@@ -50,11 +50,11 @@ export default function ProductsPage() {
           <div className="border border-border rounded-sm p-4">
             <h3 className="font-display font-bold text-sm uppercase mb-3">{t("products.shop_by_price")}</h3>
             <ul className="space-y-1.5 text-sm text-muted-foreground">
-              <li className="hover:text-foreground cursor-pointer">$0.00 – $29.00</li>
-              <li className="hover:text-foreground cursor-pointer">$29.00 – $59.00</li>
-              <li className="hover:text-foreground cursor-pointer">$59.00 – $99.00</li>
-              <li className="hover:text-foreground cursor-pointer">$99.00 – $199.00</li>
-              <li className="hover:text-foreground cursor-pointer">$199.00+</li>
+              <li className="hover:text-foreground cursor-pointer transition-colors">$0.00 – $29.00</li>
+              <li className="hover:text-foreground cursor-pointer transition-colors">$29.00 – $59.00</li>
+              <li className="hover:text-foreground cursor-pointer transition-colors">$59.00 – $99.00</li>
+              <li className="hover:text-foreground cursor-pointer transition-colors">$99.00 – $199.00</li>
+              <li className="hover:text-foreground cursor-pointer transition-colors">$199.00+</li>
             </ul>
           </div>
         </aside>
@@ -62,13 +62,16 @@ export default function ProductsPage() {
         {/* Product grid */}
         <div className="flex-1">
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm text-muted-foreground">{filtered.length} products</span>
-            <select className="text-sm border border-border rounded-sm px-3 py-1.5 bg-background text-foreground outline-none">
-              <option>{t("products.featured")}</option>
-              <option>{t("products.price_low")}</option>
-              <option>{t("products.price_high")}</option>
-              <option>{t("products.newest")}</option>
-            </select>
+            <span className="text-sm text-muted-foreground">{filtered.length} {t("products.count")}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">{t("products.sort_by")}:</span>
+              <select className="text-sm border border-border rounded-sm px-3 py-1.5 bg-background text-foreground outline-none">
+                <option>{t("products.featured")}</option>
+                <option>{t("products.price_low")}</option>
+                <option>{t("products.price_high")}</option>
+                <option>{t("products.newest")}</option>
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -92,7 +95,7 @@ export default function ProductsPage() {
 
           {filtered.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
-              <p>No products found in this category.</p>
+              <p>{t("products.not_found")}</p>
             </div>
           )}
         </div>

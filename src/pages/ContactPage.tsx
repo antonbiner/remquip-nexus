@@ -33,29 +33,29 @@ export default function ContactPage() {
           <div className="flex gap-3">
             <MapPin className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-sm">Address</h3>
+              <h3 className="font-medium text-sm">{t("contact.address_label")}</h3>
               <p className="text-sm text-muted-foreground">123 Industrial Blvd, Quebec City, QC G1K 1A1, Canada</p>
             </div>
           </div>
           <div className="flex gap-3">
             <Phone className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-sm">Phone</h3>
+              <h3 className="font-medium text-sm">{t("contact.phone_label")}</h3>
               <p className="text-sm text-muted-foreground">+1 (418) 555-0199</p>
             </div>
           </div>
           <div className="flex gap-3">
             <Mail className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-sm">Email</h3>
+              <h3 className="font-medium text-sm">{t("contact.email_label")}</h3>
               <p className="text-sm text-muted-foreground">info@remquip.ca</p>
             </div>
           </div>
           <div className="flex gap-3">
             <Clock className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-medium text-sm">Hours</h3>
-              <p className="text-sm text-muted-foreground">Mon – Fri: 8:00 AM – 5:00 PM EST</p>
+              <h3 className="font-medium text-sm">{t("contact.hours_label")}</h3>
+              <p className="text-sm text-muted-foreground">{t("contact.hours_value")}</p>
             </div>
           </div>
         </div>
