@@ -55,7 +55,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h4 className="font-display font-bold uppercase text-sm tracking-wider mb-4">{t("footer.terms")}</h4>
+              <h4 className="font-display font-bold uppercase text-sm tracking-wider mb-4">{t("footer.legal")}</h4>
               <ul className="space-y-2">
                 <li><Link to="/terms" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">{t("footer.terms")}</Link></li>
                 <li><Link to="/refund" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">{t("footer.refund")}</Link></li>
