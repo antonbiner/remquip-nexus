@@ -30,19 +30,19 @@ export default function CartPage() {
           {items.map(({ product, quantity }) => (
             <div key={product.id} className="flex gap-4 border border-border rounded-sm p-4">
               <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded-sm bg-secondary" />
-              <div className="flex-1">
-                <Link to={`/product/${product.slug}`} className="text-sm font-medium text-foreground hover:text-accent">{product.name}</Link>
+              <div className="flex-1 min-w-0">
+                <Link to={`/product/${product.slug}`} className="text-sm font-medium text-foreground hover:text-accent transition-colors line-clamp-1">{product.name}</Link>
                 <p className="text-xs text-muted-foreground">{t("products.sku")}: {product.sku}</p>
                 <p className="text-sm font-bold mt-1">{formatPrice(product.price)}</p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <button onClick={() => removeItem(product.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                <button onClick={() => removeItem(product.id)} className="text-muted-foreground hover:text-destructive transition-colors" aria-label={t("cart.remove")}>
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <div className="flex items-center border border-border rounded-sm">
-                  <button onClick={() => updateQuantity(product.id, quantity - 1)} className="px-2 py-1 hover:bg-secondary"><Minus className="h-3 w-3" /></button>
-                  <span className="px-3 py-1 text-sm">{quantity}</span>
-                  <button onClick={() => updateQuantity(product.id, quantity + 1)} className="px-2 py-1 hover:bg-secondary"><Plus className="h-3 w-3" /></button>
+                  <button onClick={() => updateQuantity(product.id, quantity - 1)} className="px-2 py-1 hover:bg-secondary transition-colors" aria-label="Decrease quantity"><Minus className="h-3 w-3" /></button>
+                  <span className="px-3 py-1 text-sm min-w-[32px] text-center">{quantity}</span>
+                  <button onClick={() => updateQuantity(product.id, quantity + 1)} className="px-2 py-1 hover:bg-secondary transition-colors" aria-label="Increase quantity"><Plus className="h-3 w-3" /></button>
                 </div>
               </div>
             </div>
@@ -50,10 +50,11 @@ export default function CartPage() {
         </div>
 
         <div className="border border-border rounded-sm p-6 h-fit">
+          <h3 className="font-display font-bold text-sm uppercase mb-4">{t("checkout.order_summary")}</h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.subtotal")}</span><span className="font-medium">{formatPrice(subtotal)}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.tax")}</span><span className="font-medium">{formatPrice(tax)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.shipping")}</span><span className="font-medium">{shipping === 0 ? "Free" : formatPrice(shipping)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{t("cart.shipping")}</span><span className="font-medium">{shipping === 0 ? t("cart.shipping_free") : formatPrice(shipping)}</span></div>
             <hr className="border-border" />
             <div className="flex justify-between text-base font-bold"><span>{t("cart.total")}</span><span>{formatPrice(total)}</span></div>
           </div>

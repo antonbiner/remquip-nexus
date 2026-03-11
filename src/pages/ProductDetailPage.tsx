@@ -15,7 +15,7 @@ export default function ProductDetailPage() {
 
   const product = products.find((p) => p.slug === slug);
   if (!product) {
-    return <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">Product not found.</div>;
+    return <div className="container mx-auto px-4 py-16 text-center text-muted-foreground">{t("products.not_found")}</div>;
   }
 
   const stockLabel = product.stock > 20 ? t("products.in_stock") : product.stock > 0 ? t("products.low_stock") : t("products.out_of_stock");
@@ -24,9 +24,9 @@ export default function ProductDetailPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+        <Link to="/" className="hover:text-foreground transition-colors">{t("nav.home")}</Link>
         <span className="mx-2">/</span>
-        <Link to={`/products/${product.categorySlug}`} className="hover:text-foreground">{product.category}</Link>
+        <Link to={`/products/${product.categorySlug}`} className="hover:text-foreground transition-colors">{product.category}</Link>
         <span className="mx-2">/</span>
         <span className="text-foreground">{product.name}</span>
       </nav>
@@ -63,11 +63,11 @@ export default function ProductDetailPage() {
 
           {/* Specifications */}
           <div className="border border-border rounded-sm overflow-hidden">
-            <h3 className="font-display font-bold text-sm uppercase px-4 py-3 bg-secondary">Specifications</h3>
+            <h3 className="font-display font-bold text-sm uppercase px-4 py-3 bg-secondary">{t("products.specifications")}</h3>
             <div className="divide-y divide-border">
               {Object.entries(product.specifications).map(([key, value]) => (
                 <div key={key} className="flex px-4 py-2.5 text-sm">
-                  <span className="w-40 text-muted-foreground">{key}</span>
+                  <span className="w-40 text-muted-foreground flex-shrink-0">{key}</span>
                   <span className="font-medium text-foreground">{value}</span>
                 </div>
               ))}
