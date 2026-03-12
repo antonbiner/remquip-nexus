@@ -83,6 +83,8 @@ const App = () => (
                     <Route path="/admin" element={<AdminLayout />}>
                       <Route index element={<AdminOverview />} />
                       <Route path="products" element={<AdminProducts />} />
+                      <Route path="products/new" element={<AdminProductEdit />} />
+                      <Route path="products/:productId" element={<AdminProductEdit />} />
                       <Route path="inventory" element={<AdminInventory />} />
                       <Route path="orders" element={<AdminOrders />} />
                       <Route path="customers" element={<AdminCustomers />} />
