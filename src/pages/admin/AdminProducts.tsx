@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Search, Plus, Edit, Trash2, Copy } from "lucide-react";
-import { products } from "@/config/products";
+import { Link } from "react-router-dom";
+import { Search, Plus, Edit, Trash2, Copy, Eye } from "lucide-react";
+import { products, categories } from "@/config/products";
 
 const statusStyles: Record<string, string> = {
   active: "badge-success",
@@ -10,42 +11,47 @@ const statusStyles: Record<string, string> = {
 
 export default function AdminProducts() {
   const [search, setSearch] = useState("");
-  const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase())
-  );
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
+  const filtered = products.filter((p) => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
+    const matchesCat = !categoryFilter || p.categorySlug === categoryFilter;
+    const matchesStatus = !statusFilter || p.status === statusFilter;
+    return matchesSearch && matchesCat && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-display font-bold text-xl">Product Management</h2>
-        <button className="btn-accent px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-2">
+        <Link to="/admin/products/new" className="btn-accent px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-2">
           <Plus className="h-4 w-4" /> Add Product
-        </button>
+        </Link>
       </div>
 
       <div className="dashboard-card">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products..."
+              placeholder="Search by name or SKU..."
               className="w-full pl-10 pr-4 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
-          <select className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
-            <option>All Categories</option>
-            <option>Air Suspension</option>
-            <option>Brake Shoes & Pads</option>
-            <option>Brake Chambers</option>
-            <option>Brake Drums</option>
+          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+            className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
+            <option value="">All Categories</option>
+            {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
           </select>
-          <select className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Draft</option>
-            <option>Archived</option>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
           </select>
         </div>
 
@@ -57,6 +63,7 @@ export default function AdminProducts() {
                 <th className="text-left px-3 py-2">SKU</th>
                 <th className="text-left px-3 py-2">Category</th>
                 <th className="text-right px-3 py-2">Price</th>
+                <th className="text-right px-3 py-2">Wholesale</th>
                 <th className="text-right px-3 py-2">Stock</th>
                 <th className="text-left px-3 py-2">Status</th>
                 <th className="text-right px-3 py-2">Actions</th>
@@ -71,14 +78,20 @@ export default function AdminProducts() {
                       <span className="font-medium truncate max-w-[200px]">{product.name}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-muted-foreground">{product.sku}</td>
+                  <td className="px-3 py-3 text-muted-foreground font-mono text-xs">{product.sku}</td>
                   <td className="px-3 py-3">{product.category}</td>
                   <td className="px-3 py-3 text-right font-medium">C${product.price.toFixed(2)}</td>
+                  <td className="px-3 py-3 text-right text-muted-foreground">C${product.wholesalePrice.toFixed(2)}</td>
                   <td className={`px-3 py-3 text-right font-medium ${product.stock < 50 ? "text-warning" : ""}`}>{product.stock}</td>
                   <td className="px-3 py-3"><span className={statusStyles[product.status]}>{product.status}</span></td>
                   <td className="px-3 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Edit"><Edit className="h-4 w-4" /></button>
+                      <Link to={`/product/${product.slug}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="View">
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link to={`/admin/products/${product.id}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Edit">
+                        <Edit className="h-4 w-4" />
+                      </Link>
                       <button className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Duplicate"><Copy className="h-4 w-4" /></button>
                       <button className="p-1.5 hover:bg-secondary rounded-sm transition-colors text-destructive" title="Delete"><Trash2 className="h-4 w-4" /></button>
                     </div>
