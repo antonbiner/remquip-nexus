@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Edit, Trash2, Copy, Eye } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Copy, Eye, X, ChevronDown, ChevronUp } from "lucide-react";
 import { products, categories } from "@/config/products";
 
 const statusStyles: Record<string, string> = {
@@ -13,6 +13,7 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
 
   const filtered = products.filter((p) => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
@@ -24,15 +25,15 @@ export default function AdminProducts() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-display font-bold text-xl">Product Management</h2>
-        <Link to="/admin/products/new" className="btn-accent px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-2">
-          <Plus className="h-4 w-4" /> Add Product
+        <h2 className="font-display font-bold text-lg md:text-xl">Product Management</h2>
+        <Link to="/admin/products/new" className="btn-accent px-3 md:px-4 py-2 rounded-sm text-xs md:text-sm font-medium flex items-center gap-2">
+          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Add Product</span><span className="sm:hidden">Add</span>
         </Link>
       </div>
 
       <div className="dashboard-card">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
+          <div className="relative flex-1 w-full min-w-0 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               value={search}
@@ -41,21 +42,82 @@ export default function AdminProducts() {
               className="w-full pl-10 pr-4 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
-            className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
-            <option value="">All Categories</option>
-            {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
-          </select>
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+              className="flex-1 sm:flex-none border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
+              <option value="">All Categories</option>
+              {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
+            </select>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex-1 sm:flex-none border border-border rounded-sm px-3 py-2 text-sm bg-background outline-none">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          {(search || categoryFilter || statusFilter) && (
+            <button onClick={() => { setSearch(""); setCategoryFilter(""); setStatusFilter(""); }} className="text-xs text-accent hover:underline flex items-center gap-1">
+              <X className="h-3 w-3" /> Clear
+            </button>
+          )}
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile card view */}
+        <div className="md:hidden space-y-2">
+          {filtered.map((product) => {
+            const isExpanded = expandedProduct === product.id;
+            return (
+              <div key={product.id} className="border border-border rounded-md overflow-hidden">
+                <button
+                  onClick={() => setExpandedProduct(isExpanded ? null : product.id)}
+                  className="w-full p-3 text-left flex items-center gap-3"
+                >
+                  <img src={product.image} alt="" className="w-12 h-12 rounded-sm object-cover bg-secondary flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{product.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs text-muted-foreground font-mono">{product.sku}</span>
+                      <span className={statusStyles[product.status]}>{product.status}</span>
+                    </div>
+                    <p className="text-sm font-bold mt-0.5">C${product.price.toFixed(2)}</p>
+                  </div>
+                  {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                </button>
+                {isExpanded && (
+                  <div className="px-3 pb-3 border-t border-border pt-3 bg-secondary/30 space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Category</span>
+                      <span>{product.category}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Wholesale</span>
+                      <span>C${product.wholesalePrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-muted-foreground">Stock</span>
+                      <span className={product.stock < 50 ? "text-warning font-medium" : ""}>{product.stock}</span>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Link to={`/product/${product.slug}`} className="flex-1 text-xs py-1.5 border border-border rounded-sm hover:bg-secondary transition-colors flex items-center justify-center gap-1">
+                        <Eye className="h-3 w-3" /> View
+                      </Link>
+                      <Link to={`/admin/products/${product.id}`} className="flex-1 text-xs py-1.5 btn-accent rounded-sm flex items-center justify-center gap-1">
+                        <Edit className="h-3 w-3" /> Edit
+                      </Link>
+                      <button className="px-3 py-1.5 border border-destructive rounded-sm text-destructive text-xs hover:bg-destructive/10 transition-colors">
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="table-header">
@@ -102,12 +164,16 @@ export default function AdminProducts() {
           </table>
         </div>
 
+        {filtered.length === 0 && (
+          <div className="text-center py-8 text-sm text-muted-foreground">No products found.</div>
+        )}
+
         <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
           <span>Showing {filtered.length} of {products.length} products</span>
           <div className="flex gap-1">
-            <button className="px-3 py-1 border border-border rounded-sm hover:bg-secondary">Prev</button>
-            <button className="px-3 py-1 bg-accent text-accent-foreground rounded-sm">1</button>
-            <button className="px-3 py-1 border border-border rounded-sm hover:bg-secondary">Next</button>
+            <button className="px-3 py-1 border border-border rounded-sm hover:bg-secondary text-xs">Prev</button>
+            <button className="px-3 py-1 bg-accent text-accent-foreground rounded-sm text-xs">1</button>
+            <button className="px-3 py-1 border border-border rounded-sm hover:bg-secondary text-xs">Next</button>
           </div>
         </div>
       </div>

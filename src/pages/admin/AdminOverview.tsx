@@ -1,12 +1,13 @@
 import React from "react";
-import { Package, ShoppingBag, Users, DollarSign, TrendingUp, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Package, ShoppingBag, Users, DollarSign, TrendingUp, AlertTriangle, ArrowRight } from "lucide-react";
 import { products } from "@/config/products";
 
 const stats = [
-  { label: "Total Products", value: products.length.toString(), icon: Package, change: "+3 this month" },
-  { label: "Total Orders", value: "156", icon: ShoppingBag, change: "+12 this week" },
-  { label: "Customers", value: "89", icon: Users, change: "+5 this month" },
-  { label: "Revenue", value: "C$48,290", icon: DollarSign, change: "+18% vs last month" },
+  { label: "Total Products", value: products.length.toString(), icon: Package, change: "+3 this month", color: "text-accent" },
+  { label: "Total Orders", value: "156", icon: ShoppingBag, change: "+12 this week", color: "text-info" },
+  { label: "Customers", value: "89", icon: Users, change: "+5 this month", color: "text-success" },
+  { label: "Revenue", value: "C$48,290", icon: DollarSign, change: "+18% vs last month", color: "text-accent" },
 ];
 
 const recentOrders = [
@@ -31,44 +32,49 @@ export default function AdminOverview() {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {stats.map((stat) => (
           <div key={stat.label} className="dashboard-card">
             <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-                <p className="text-2xl font-bold font-display mt-1">{stat.value}</p>
-                <p className="text-xs text-success flex items-center gap-1 mt-1"><TrendingUp className="h-3 w-3" />{stat.change}</p>
+              <div className="min-w-0">
+                <p className="text-xs md:text-sm text-muted-foreground truncate">{stat.label}</p>
+                <p className="text-xl md:text-2xl font-bold font-display mt-1">{stat.value}</p>
+                <p className="text-xs text-success flex items-center gap-1 mt-1"><TrendingUp className="h-3 w-3 flex-shrink-0" /><span className="truncate">{stat.change}</span></p>
               </div>
-              <stat.icon className="h-8 w-8 text-accent" strokeWidth={1.5} />
+              <stat.icon className={`h-7 w-7 md:h-8 md:w-8 flex-shrink-0 ${stat.color}`} strokeWidth={1.5} />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
         {/* Recent orders */}
         <div className="lg:col-span-2 dashboard-card">
-          <h3 className="font-display font-bold text-sm uppercase mb-4">Recent Orders</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-bold text-sm uppercase">Recent Orders</h3>
+            <Link to="/admin/orders" className="text-xs text-accent font-medium hover:underline flex items-center gap-1">
+              View All <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <table className="w-full text-sm min-w-[500px]">
               <thead>
                 <tr className="table-header">
                   <th className="text-left px-3 py-2">Order</th>
                   <th className="text-left px-3 py-2">Customer</th>
                   <th className="text-left px-3 py-2">Total</th>
                   <th className="text-left px-3 py-2">Status</th>
-                  <th className="text-left px-3 py-2">Date</th>
+                  <th className="text-left px-3 py-2 hidden sm:table-cell">Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-secondary/50 transition-colors">
-                    <td className="px-3 py-2.5 font-medium">{order.id}</td>
-                    <td className="px-3 py-2.5">{order.customer}</td>
-                    <td className="px-3 py-2.5 font-medium">{order.total}</td>
+                    <td className="px-3 py-2.5 font-medium text-xs md:text-sm">{order.id}</td>
+                    <td className="px-3 py-2.5 text-xs md:text-sm truncate max-w-[120px] md:max-w-none">{order.customer}</td>
+                    <td className="px-3 py-2.5 font-medium text-xs md:text-sm">{order.total}</td>
                     <td className="px-3 py-2.5"><span className={statusStyles[order.status]}>{order.status}</span></td>
-                    <td className="px-3 py-2.5 text-muted-foreground">{order.date}</td>
+                    <td className="px-3 py-2.5 text-muted-foreground text-xs hidden sm:table-cell">{order.date}</td>
                   </tr>
                 ))}
               </tbody>
@@ -78,19 +84,41 @@ export default function AdminOverview() {
 
         {/* Low stock */}
         <div className="dashboard-card">
-          <h3 className="font-display font-bold text-sm uppercase mb-4 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-warning" /> Low Stock Alerts
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display font-bold text-sm uppercase flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-warning" /> Low Stock
+            </h3>
+            <Link to="/admin/inventory" className="text-xs text-accent font-medium hover:underline">View All</Link>
+          </div>
           <div className="space-y-3">
-            {lowStockProducts.map((p) => (
+            {lowStockProducts.slice(0, 6).map((p) => (
               <div key={p.id} className="flex items-center justify-between text-sm">
-                <span className="truncate mr-2">{p.name}</span>
-                <span className={`font-medium ${p.stock < 20 ? "text-destructive" : "text-warning"}`}>{p.stock} units</span>
+                <span className="truncate mr-2 text-xs md:text-sm">{p.name}</span>
+                <span className={`font-medium flex-shrink-0 text-xs md:text-sm ${p.stock < 20 ? "text-destructive" : "text-warning"}`}>{p.stock}</span>
               </div>
             ))}
             {lowStockProducts.length === 0 && <p className="text-sm text-muted-foreground">All products well-stocked.</p>}
           </div>
         </div>
+      </div>
+
+      {/* Quick actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Add Product", to: "/admin/products/new", icon: Package },
+          { label: "View Orders", to: "/admin/orders", icon: ShoppingBag },
+          { label: "Customers", to: "/admin/customers", icon: Users },
+          { label: "Analytics", to: "/admin/analytics", icon: TrendingUp },
+        ].map((action) => (
+          <Link
+            key={action.to}
+            to={action.to}
+            className="dashboard-card flex items-center gap-3 hover:border-accent transition-colors"
+          >
+            <action.icon className="h-5 w-5 text-accent flex-shrink-0" />
+            <span className="text-sm font-medium">{action.label}</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
