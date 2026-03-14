@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
-import { SlidersHorizontal, X } from "lucide-react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
+import { SlidersHorizontal, X, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useCart } from "@/contexts/CartContext";
@@ -18,6 +18,8 @@ const PRICE_RANGES = [
 
 export default function ProductsPage() {
   const { categorySlug } = useParams<{ categorySlug?: string }>();
+  const [searchParams] = useSearchParams();
+  const searchFromUrl = searchParams.get("q") || "";
   const { t } = useLanguage();
   const { formatPrice } = useCurrency();
   const { addItem } = useCart();
@@ -26,12 +28,25 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState<number | null>(null);
   const [stockOnly, setStockOnly] = useState(false);
   const [mobileFilters, setMobileFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchFromUrl);
 
   const category = categorySlug ? categories.find((c) => c.slug === categorySlug) : null;
-  const pageTitle = category ? t(category.translationKey) : t("cat.shop_all");
+  const pageTitle = category ? t(category.translationKey) : searchFromUrl ? `Search: "${searchFromUrl}"` : t("cat.shop_all");
 
   const filtered = useMemo(() => {
     let list = categorySlug ? products.filter((p) => p.categorySlug === categorySlug) : [...products];
+
+    // Apply search query (from URL or local)
+    const q = (searchQuery || searchFromUrl).toLowerCase().trim();
+    if (q.length >= 2) {
+      list = list.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        (p.compatibility && p.compatibility.some(c => c.toLowerCase().includes(q)))
+      );
+    }
 
     if (priceRange !== null) {
       const range = PRICE_RANGES[priceRange];
@@ -49,17 +64,32 @@ export default function ProductsPage() {
     }
 
     return list;
-  }, [categorySlug, sort, priceRange, stockOnly]);
+  }, [categorySlug, sort, priceRange, stockOnly, searchQuery, searchFromUrl]);
 
-  const hasActiveFilters = priceRange !== null || stockOnly;
+  const hasActiveFilters = priceRange !== null || stockOnly || searchQuery.length >= 2;
 
   function clearFilters() {
     setPriceRange(null);
     setStockOnly(false);
+    setSearchQuery("");
   }
 
   const filterPanel = (
     <div className="space-y-4">
+      {/* Search within results */}
+      <div className="border border-border rounded-sm p-4">
+        <h3 className="font-display font-bold text-sm uppercase mb-3">Search</h3>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Filter by keyword..."
+            className="w-full pl-8 pr-3 py-2 text-sm border border-border rounded-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+          />
+        </div>
+      </div>
+
       {/* Categories */}
       <div className="border border-border rounded-sm p-4">
         <h3 className="font-display font-bold text-sm uppercase mb-3">{t("footer.categories")}</h3>
@@ -122,7 +152,7 @@ export default function ProductsPage() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       {/* Breadcrumb */}
       <nav className="text-sm text-muted-foreground mb-4">
         <Link to="/" className="hover:text-foreground transition-colors">{t("nav.home")}</Link>
@@ -131,13 +161,13 @@ export default function ProductsPage() {
       </nav>
 
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl md:text-3xl font-bold uppercase">{pageTitle}</h1>
+        <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold uppercase">{pageTitle}</h1>
         <button onClick={() => setMobileFilters(true)} className="md:hidden flex items-center gap-2 text-sm border border-border rounded-sm px-3 py-2">
           <SlidersHorizontal className="h-4 w-4" /> {t("products.filters")}
         </button>
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex gap-6 lg:gap-8">
         {/* Sidebar - desktop */}
         <aside className="hidden md:block w-56 flex-shrink-0">
           {filterPanel}
@@ -147,7 +177,7 @@ export default function ProductsPage() {
         {mobileFilters && (
           <div className="fixed inset-0 z-50 md:hidden">
             <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileFilters(false)} />
-            <div className="absolute right-0 top-0 bottom-0 w-72 bg-background p-4 overflow-y-auto shadow-lg">
+            <div className="absolute right-0 top-0 bottom-0 w-72 bg-background p-4 overflow-y-auto shadow-lg animate-slide-in-right">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-bold text-lg">{t("products.filters")}</h3>
                 <button onClick={() => setMobileFilters(false)}><X className="h-5 w-5" /></button>
@@ -158,8 +188,8 @@ export default function ProductsPage() {
         )}
 
         {/* Product grid */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-6">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-4 md:mb-6">
             <span className="text-sm text-muted-foreground">{filtered.length} {t("products.count")}</span>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground hidden sm:inline">{t("products.sort_by")}:</span>
@@ -176,7 +206,7 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
             {filtered.map((product) => (
               <div key={product.id} className="product-card group">
                 <div className="aspect-square overflow-hidden bg-secondary relative">

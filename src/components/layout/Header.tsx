@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, User, Menu, X, ChevronDown } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, CheckCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { useCart } from "@/contexts/CartContext";
@@ -10,7 +10,7 @@ import FlagIcon from "@/components/FlagIcon";
 export default function Header() {
   const { t, lang, setLang } = useLanguage();
   const { currency, setCurrency, formatPrice } = useCurrency();
-  const { itemCount } = useCart();
+  const { itemCount, lastAddedAt } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,10 +20,20 @@ export default function Header() {
   const [searchResults, setSearchResults] = useState<typeof products>([]);
   const [showResults, setShowResults] = useState(false);
   const [mobileSearchFocused, setMobileSearchFocused] = useState(false);
+  const [badgeBounce, setBadgeBounce] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
   const currRef = useRef<HTMLDivElement>(null);
+
+  // Animate badge when items added
+  useEffect(() => {
+    if (lastAddedAt > 0) {
+      setBadgeBounce(true);
+      const timer = setTimeout(() => setBadgeBounce(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAddedAt]);
 
   // Close on route change
   useEffect(() => {
@@ -54,18 +64,17 @@ export default function Header() {
     setSearchQuery(query);
     if (query.length >= 2) {
       const q = query.toLowerCase();
-      setSearchResults(
-        products
-          .filter((p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.sku.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q)
-          )
-          .slice(0, 6)
-      );
+      const results = products.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.sku.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        (p.compatibility && p.compatibility.some(c => c.toLowerCase().includes(q)))
+      ).slice(0, 6);
+      setSearchResults(results);
       setShowResults(true);
       setMobileSearchFocused(true);
     } else {
+      setSearchResults([]);
       setShowResults(false);
       setMobileSearchFocused(false);
     }
@@ -79,12 +88,21 @@ export default function Header() {
     setMobileOpen(false);
   }
 
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (searchQuery.length >= 2) {
+      navigate(`/products?q=${encodeURIComponent(searchQuery)}`);
+      setShowResults(false);
+      setMobileSearchFocused(false);
+      setMobileOpen(false);
+    }
+  }
+
   const langFlag = lang === "en" ? "us" : "fr";
   const currFlag = currency === "CAD" ? "ca" : currency === "USD" ? "us" : "eu";
-  const currSymbol = currency === "CAD" ? "C$" : currency === "USD" ? "$" : "€";
 
-  const SearchResultsList = ({ results }: { results: typeof products }) => (
-    <div className="bg-card border border-border rounded-md shadow-xl z-50 max-h-[320px] overflow-y-auto divide-y divide-border">
+  const SearchResultsList = ({ results, query }: { results: typeof products; query: string }) => (
+    <div className="bg-card border border-border rounded-md shadow-xl z-50 max-h-[360px] overflow-y-auto divide-y divide-border">
       {results.map((p) => (
         <button
           key={p.id}
@@ -96,12 +114,21 @@ export default function Header() {
             <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
             <p className="text-xs text-muted-foreground">{p.sku} · {formatPrice(p.price)}</p>
           </div>
+          {p.stock > 0 && <CheckCircle className="h-3.5 w-3.5 text-success flex-shrink-0" />}
         </button>
       ))}
-      {results.length === 0 && (
+      {results.length === 0 && query.length >= 2 && (
         <div className="px-4 py-6 text-center text-sm text-muted-foreground">
           {t("products.not_found")}
         </div>
+      )}
+      {results.length > 0 && (
+        <button
+          onClick={() => { navigate(`/products?q=${encodeURIComponent(query)}`); setShowResults(false); setSearchQuery(""); }}
+          className="w-full px-4 py-2.5 text-center text-sm text-accent font-medium hover:bg-secondary/60 transition-colors"
+        >
+          View all results →
+        </button>
       )}
     </div>
   );
@@ -118,7 +145,7 @@ export default function Header() {
 
           {/* Desktop search */}
           <div className="hidden md:flex flex-1 max-w-md mx-4 lg:max-w-lg lg:mx-6" ref={searchRef}>
-            <div className="relative w-full">
+            <form onSubmit={handleSearchSubmit} className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
@@ -130,10 +157,10 @@ export default function Header() {
               />
               {showResults && (
                 <div className="absolute top-full left-0 right-0 mt-1.5">
-                  <SearchResultsList results={searchResults} />
+                  <SearchResultsList results={searchResults} query={searchQuery} />
                 </div>
               )}
-            </div>
+            </form>
           </div>
 
           {/* Right actions */}
@@ -198,7 +225,11 @@ export default function Header() {
             <Link to="/cart" className="flex items-center text-nav-foreground hover:text-nav-accent transition-colors relative p-1.5 rounded-sm" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full h-[18px] min-w-[18px] flex items-center justify-center px-1 leading-none">
+                <span
+                  className={`absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full h-[18px] min-w-[18px] flex items-center justify-center px-1 leading-none transition-transform ${
+                    badgeBounce ? "animate-cart-bounce" : ""
+                  }`}
+                >
                   {itemCount}
                 </span>
               )}
@@ -239,21 +270,23 @@ export default function Header() {
 
       {/* ── Mobile menu overlay ── */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background overflow-y-auto">
+        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background overflow-y-auto animate-fade-in">
           <div className="px-4 py-4 space-y-4">
             {/* Mobile search */}
             <div ref={mobileSearchRef} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                placeholder={t("nav.search.placeholder")}
-                className="w-full pl-10 pr-4 py-2.5 rounded-md bg-secondary text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent"
-              />
+              <form onSubmit={handleSearchSubmit}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder={t("nav.search.placeholder")}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-md bg-secondary text-foreground text-sm border border-border outline-none focus:ring-2 focus:ring-accent"
+                />
+              </form>
               {mobileSearchFocused && searchResults.length > 0 && (
                 <div className="mt-1.5">
-                  <SearchResultsList results={searchResults} />
+                  <SearchResultsList results={searchResults} query={searchQuery} />
                 </div>
               )}
             </div>
