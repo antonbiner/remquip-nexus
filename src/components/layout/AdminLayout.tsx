@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Package, Warehouse, ShoppingBag, Users, FileText,
-  BarChart3, Settings, ChevronLeft, Menu, X,
+  BarChart3, Settings, ChevronLeft, Menu, X, Tag,
 } from "lucide-react";
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { label: "Inventory", icon: Warehouse, path: "/admin/inventory" },
   { label: "Orders", icon: ShoppingBag, path: "/admin/orders" },
   { label: "Customers", icon: Users, path: "/admin/customers" },
+  { label: "Discounts", icon: Tag, path: "/admin/discounts" },
   { label: "CMS", icon: FileText, path: "/admin/cms" },
   { label: "Analytics", icon: BarChart3, path: "/admin/analytics" },
   { label: "Settings", icon: Settings, path: "/admin/settings" },
