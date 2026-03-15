@@ -1,19 +1,31 @@
 import React, { useState } from "react";
-import { Eye, Search, X, ChevronDown, ChevronUp, Package, Truck, CheckCircle, Clock } from "lucide-react";
+import { Eye, Search, X, ChevronDown, ChevronUp, Package, Truck, CheckCircle, Clock, Printer, Download, Mail, ArrowLeft, MapPin, CreditCard, FileText } from "lucide-react";
 
 const allOrders = [
-  { id: "RMQ-001234", customer: "Groupe Transport Lévis", email: "info@gtl.ca", items: 4, total: "C$2,450.00", status: "processing", date: "2026-03-10", payment: "Invoice",
-    products: [{ name: "Air Spring W01-358 9781", qty: 2, price: "C$89.99" }, { name: "30/30 Long Stroke Brake Chamber", qty: 2, price: "C$134.50" }] },
-  { id: "RMQ-001233", customer: "Fleet Services Ontario", email: "orders@fso.com", items: 2, total: "C$1,890.50", status: "shipped", date: "2026-03-09", payment: "Credit Card",
-    products: [{ name: "ADB22X Air Disc Brake Pad Kit", qty: 2, price: "C$156.00" }] },
-  { id: "RMQ-001232", customer: "Québec Truck Parts Inc.", email: "buy@qtp.ca", items: 8, total: "C$3,200.00", status: "completed", date: "2026-03-08", payment: "Bank Transfer",
-    products: [{ name: "4707Q Brake Shoe Kit", qty: 8, price: "C$74.99" }] },
-  { id: "RMQ-001231", customer: "Maritime Heavy Hauling", email: "fleet@mhh.ca", items: 1, total: "C$675.00", status: "pending", date: "2026-03-08", payment: "Invoice",
-    products: [{ name: "Brake Drum - Gunite 3600A", qty: 1, price: "C$198.00" }] },
-  { id: "RMQ-001230", customer: "Prairie Fleet Maintenance", email: "parts@pfm.ca", items: 3, total: "C$1,120.00", status: "completed", date: "2026-03-07", payment: "Credit Card",
-    products: [{ name: "4515Q Brake Shoe Assembly Kit", qty: 3, price: "C$89.99" }] },
-  { id: "RMQ-001229", customer: "BC Trucking Solutions", email: "ops@bcts.ca", items: 6, total: "C$4,150.00", status: "processing", date: "2026-03-06", payment: "Invoice",
-    products: [{ name: "Air Spring W01-358 9781", qty: 6, price: "C$89.99" }] },
+  { id: "RMQ-001234", customer: "Groupe Transport Lévis", email: "info@gtl.ca", phone: "+1 418 555 0101", items: 4, total: 2450.00, subtotal: 2142.00, tax: 308.00, shipping: 0, status: "processing", date: "2026-03-10", payment: "Invoice", trackingNumber: "",
+    address: { street: "456 Route de la Traverse", city: "Lévis", province: "QC", postal: "G6V 6N2", country: "Canada" },
+    products: [{ name: "Air Spring W01-358 9781", sku: "1T15ZR-6", qty: 2, unitPrice: 89.99, total: 179.98 }, { name: "30/30 Long Stroke Brake Chamber", sku: "SC3030LS", qty: 2, unitPrice: 134.50, total: 269.00 }],
+    notes: [{ date: "2026-03-10 09:15", user: "System", text: "Order placed" }, { date: "2026-03-10 10:30", user: "Marc Dupont", text: "Payment confirmed via invoice" }] },
+  { id: "RMQ-001233", customer: "Fleet Services Ontario", email: "orders@fso.com", phone: "+1 416 555 0202", items: 2, total: 1890.50, subtotal: 1652.19, tax: 238.31, shipping: 0, status: "shipped", date: "2026-03-09", payment: "Credit Card", trackingNumber: "1Z999AA10123456784",
+    address: { street: "789 Industrial Pkwy", city: "Toronto", province: "ON", postal: "M3J 2P1", country: "Canada" },
+    products: [{ name: "ADB22X Air Disc Brake Pad Kit", sku: "ADB22X-PAD", qty: 2, unitPrice: 156.00, total: 312.00 }],
+    notes: [{ date: "2026-03-09 08:00", user: "System", text: "Order placed" }, { date: "2026-03-09 14:00", user: "Julie Martin", text: "Shipped via Purolator" }] },
+  { id: "RMQ-001232", customer: "Québec Truck Parts Inc.", email: "buy@qtp.ca", phone: "+1 418 555 0303", items: 8, total: 3200.00, subtotal: 2798.25, tax: 401.75, shipping: 0, status: "completed", date: "2026-03-08", payment: "Bank Transfer", trackingNumber: "1Z999AA10123456785",
+    address: { street: "123 Rue du Commerce", city: "Québec", province: "QC", postal: "G1K 7P4", country: "Canada" },
+    products: [{ name: "4707Q Brake Shoe Kit", sku: "4707Q-KIT", qty: 8, unitPrice: 74.99, total: 599.92 }],
+    notes: [{ date: "2026-03-08 07:30", user: "System", text: "Order placed" }] },
+  { id: "RMQ-001231", customer: "Maritime Heavy Hauling", email: "fleet@mhh.ca", phone: "+1 506 555 0404", items: 1, total: 675.00, subtotal: 590.09, tax: 84.91, shipping: 25.00, status: "pending", date: "2026-03-08", payment: "Invoice", trackingNumber: "",
+    address: { street: "321 Harbour Rd", city: "Saint John", province: "NB", postal: "E2L 4Z6", country: "Canada" },
+    products: [{ name: "Brake Drum - Gunite 3600A", sku: "3600AX", qty: 1, unitPrice: 198.00, total: 198.00 }],
+    notes: [{ date: "2026-03-08 11:00", user: "System", text: "Order placed" }, { date: "2026-03-08 11:05", user: "System", text: "Awaiting payment confirmation" }] },
+  { id: "RMQ-001230", customer: "Prairie Fleet Maintenance", email: "parts@pfm.ca", phone: "+1 306 555 0505", items: 3, total: 1120.00, subtotal: 979.82, tax: 140.18, shipping: 0, status: "completed", date: "2026-03-07", payment: "Credit Card", trackingNumber: "1Z999AA10123456786",
+    address: { street: "555 Main St W", city: "Saskatoon", province: "SK", postal: "S7M 0W6", country: "Canada" },
+    products: [{ name: "4515Q Brake Shoe Assembly Kit", sku: "4515Q-ASM", qty: 3, unitPrice: 89.99, total: 269.97 }],
+    notes: [{ date: "2026-03-07 09:00", user: "System", text: "Order placed" }, { date: "2026-03-08 16:00", user: "System", text: "Delivered" }] },
+  { id: "RMQ-001229", customer: "BC Trucking Solutions", email: "ops@bcts.ca", phone: "+1 604 555 0606", items: 6, total: 4150.00, subtotal: 3631.58, tax: 518.42, shipping: 0, status: "processing", date: "2026-03-06", payment: "Invoice", trackingNumber: "",
+    address: { street: "888 Terminal Ave", city: "Vancouver", province: "BC", postal: "V6A 4G2", country: "Canada" },
+    products: [{ name: "Air Spring W01-358 9781", sku: "1T15ZR-6", qty: 6, unitPrice: 89.99, total: 539.94 }],
+    notes: [{ date: "2026-03-06 15:00", user: "System", text: "Order placed" }] },
 ];
 
 const statusStyles: Record<string, string> = {
@@ -22,8 +34,10 @@ const statusStyles: Record<string, string> = {
   shipped: "badge-info",
   completed: "badge-success",
   cancelled: "badge-destructive",
+  refunded: "badge-destructive",
 };
 
+const statusFlow = ["pending", "processing", "shipped", "completed"];
 const statusIcons: Record<string, React.ElementType> = {
   pending: Clock,
   processing: Package,
@@ -35,24 +49,184 @@ export default function AdminOrders() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<typeof allOrders[0] | null>(null);
+  const [orderStatuses, setOrderStatuses] = useState<Record<string, string>>({});
+  const [newNote, setNewNote] = useState("");
+
+  const getStatus = (orderId: string, originalStatus: string) => orderStatuses[orderId] || originalStatus;
 
   const filtered = allOrders.filter((o) => {
+    const status = getStatus(o.id, o.status);
     const matchesSearch = !search || o.id.toLowerCase().includes(search.toLowerCase()) || o.customer.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = !statusFilter || o.status === statusFilter;
+    const matchesStatus = !statusFilter || status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const statusCounts = {
     all: allOrders.length,
-    pending: allOrders.filter(o => o.status === "pending").length,
-    processing: allOrders.filter(o => o.status === "processing").length,
-    shipped: allOrders.filter(o => o.status === "shipped").length,
-    completed: allOrders.filter(o => o.status === "completed").length,
+    pending: allOrders.filter(o => getStatus(o.id, o.status) === "pending").length,
+    processing: allOrders.filter(o => getStatus(o.id, o.status) === "processing").length,
+    shipped: allOrders.filter(o => getStatus(o.id, o.status) === "shipped").length,
+    completed: allOrders.filter(o => getStatus(o.id, o.status) === "completed").length,
   };
 
+  function handleStatusChange(orderId: string, newStatus: string) {
+    setOrderStatuses(prev => ({ ...prev, [orderId]: newStatus }));
+  }
+
+  // ── Order Detail View ──
+  if (selectedOrder) {
+    const status = getStatus(selectedOrder.id, selectedOrder.status);
+    const currentIdx = statusFlow.indexOf(status);
+
+    return (
+      <div className="space-y-6">
+        <button onClick={() => setSelectedOrder(null)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <ArrowLeft className="h-4 w-4" /> Back to Orders
+        </button>
+
+        {/* Order header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="font-display font-bold text-lg md:text-xl">{selectedOrder.id}</h2>
+            <p className="text-sm text-muted-foreground">Placed on {selectedOrder.date} · {selectedOrder.payment}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="px-3 py-2 border border-border rounded-sm text-xs font-medium hover:bg-secondary transition-colors flex items-center gap-1.5">
+              <Printer className="h-3.5 w-3.5" /> Print Invoice
+            </button>
+            <button className="px-3 py-2 border border-border rounded-sm text-xs font-medium hover:bg-secondary transition-colors flex items-center gap-1.5">
+              <Download className="h-3.5 w-3.5" /> Export PDF
+            </button>
+            <button className="px-3 py-2 border border-border rounded-sm text-xs font-medium hover:bg-secondary transition-colors flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5" /> Email Customer
+            </button>
+          </div>
+        </div>
+
+        {/* Status timeline */}
+        <div className="dashboard-card">
+          <h3 className="font-display font-bold text-sm uppercase mb-4">Order Status</h3>
+          <div className="flex items-center gap-1 sm:gap-2 mb-4 overflow-x-auto pb-2">
+            {statusFlow.map((s, i) => {
+              const Icon = statusIcons[s];
+              const isActive = i <= currentIdx;
+              const isCurrent = s === status;
+              return (
+                <React.Fragment key={s}>
+                  {i > 0 && <div className={`h-0.5 flex-1 min-w-4 ${i <= currentIdx ? "bg-accent" : "bg-border"}`} />}
+                  <button
+                    onClick={() => handleStatusChange(selectedOrder.id, s)}
+                    className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-sm text-xs font-medium whitespace-nowrap transition-colors ${
+                      isCurrent ? "bg-accent text-accent-foreground" : isActive ? "bg-accent/20 text-accent" : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline capitalize">{s}</span>
+                  </button>
+                </React.Fragment>
+              );
+            })}
+          </div>
+          {status === "shipped" && (
+            <div className="flex items-center gap-2 text-sm bg-secondary/50 p-3 rounded-sm">
+              <Truck className="h-4 w-4 text-accent flex-shrink-0" />
+              <span className="text-muted-foreground">Tracking:</span>
+              <span className="font-mono text-xs">{selectedOrder.trackingNumber || "Not yet assigned"}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
+          {/* Products */}
+          <div className="lg:col-span-2 dashboard-card">
+            <h3 className="font-display font-bold text-sm uppercase mb-4">Items</h3>
+            <div className="space-y-3">
+              {selectedOrder.products.map((p, i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{p.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{p.sku}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-4">
+                    <p className="text-sm font-medium">C${p.total.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">{p.qty} × C${p.unitPrice.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 pt-4 border-t border-border space-y-1.5 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>C${selectedOrder.subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Tax</span><span>C${selectedOrder.tax.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{selectedOrder.shipping === 0 ? "Free" : `C$${selectedOrder.shipping.toFixed(2)}`}</span></div>
+              <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span>C${selectedOrder.total.toFixed(2)}</span></div>
+            </div>
+          </div>
+
+          {/* Sidebar info */}
+          <div className="space-y-4">
+            {/* Customer */}
+            <div className="dashboard-card">
+              <h3 className="font-display font-bold text-sm uppercase mb-3">Customer</h3>
+              <p className="text-sm font-medium">{selectedOrder.customer}</p>
+              <a href={`mailto:${selectedOrder.email}`} className="text-xs text-accent hover:underline block mt-1">{selectedOrder.email}</a>
+              <a href={`tel:${selectedOrder.phone}`} className="text-xs text-muted-foreground block mt-0.5">{selectedOrder.phone}</a>
+            </div>
+
+            {/* Shipping */}
+            <div className="dashboard-card">
+              <h3 className="font-display font-bold text-sm uppercase mb-3 flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> Shipping Address</h3>
+              <p className="text-sm">{selectedOrder.address.street}</p>
+              <p className="text-sm">{selectedOrder.address.city}, {selectedOrder.address.province} {selectedOrder.address.postal}</p>
+              <p className="text-sm text-muted-foreground">{selectedOrder.address.country}</p>
+            </div>
+
+            {/* Payment */}
+            <div className="dashboard-card">
+              <h3 className="font-display font-bold text-sm uppercase mb-3 flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Payment</h3>
+              <p className="text-sm">{selectedOrder.payment}</p>
+              <span className={statusStyles[status]}>{status}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Activity / Notes */}
+        <div className="dashboard-card">
+          <h3 className="font-display font-bold text-sm uppercase mb-4 flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> Activity & Notes</h3>
+          <div className="space-y-3 mb-4">
+            {selectedOrder.notes.map((note, i) => (
+              <div key={i} className="flex gap-3 text-sm">
+                <div className="w-2 h-2 rounded-full bg-accent mt-1.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">{note.date} · {note.user}</p>
+                  <p className="text-sm">{note.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Add a note..."
+              className="flex-1 px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+            />
+            <button onClick={() => setNewNote("")} className="btn-accent px-4 py-2 rounded-sm text-sm font-medium">Add</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Order List View ──
   return (
     <div className="space-y-6">
-      <h2 className="font-display font-bold text-lg md:text-xl">Order Management</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display font-bold text-lg md:text-xl">Order Management</h2>
+        <button className="px-3 py-2 border border-border rounded-sm text-xs font-medium hover:bg-secondary transition-colors flex items-center gap-1.5">
+          <Download className="h-3.5 w-3.5" /> Export
+        </button>
+      </div>
 
       <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4">
         {[
@@ -94,7 +268,7 @@ export default function AdminOrders() {
         {/* Mobile card view */}
         <div className="md:hidden space-y-3">
           {filtered.map((o) => {
-            const StatusIcon = statusIcons[o.status] || Package;
+            const status = getStatus(o.id, o.status);
             const isExpanded = expandedOrder === o.id;
             return (
               <div key={o.id} className="border border-border rounded-md overflow-hidden">
@@ -105,10 +279,10 @@ export default function AdminOrders() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-sm">{o.id}</span>
-                      <span className={statusStyles[o.status]}>{o.status}</span>
+                      <span className={statusStyles[status]}>{status}</span>
                     </div>
                     <p className="text-xs text-muted-foreground truncate">{o.customer}</p>
-                    <p className="text-sm font-bold mt-0.5">{o.total}</p>
+                    <p className="text-sm font-bold mt-0.5">C${o.total.toFixed(2)}</p>
                   </div>
                   {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                 </button>
@@ -135,15 +309,19 @@ export default function AdminOrders() {
                       {o.products.map((p, i) => (
                         <div key={i} className="flex justify-between text-xs text-muted-foreground py-0.5">
                           <span className="truncate mr-2">{p.name} ×{p.qty}</span>
-                          <span>{p.price}</span>
+                          <span>C${p.total.toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
                     <div className="flex gap-2 pt-2">
-                      <button className="flex-1 btn-accent text-xs py-2 rounded-sm font-medium">Update Status</button>
-                      <button className="px-3 py-2 border border-border rounded-sm text-xs hover:bg-secondary transition-colors">
-                        <Eye className="h-3.5 w-3.5" />
-                      </button>
+                      <button onClick={() => setSelectedOrder(o)} className="flex-1 btn-accent text-xs py-2 rounded-sm font-medium">View Details</button>
+                      <select
+                        value={status}
+                        onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                        className="border border-border rounded-sm px-2 py-1.5 text-xs bg-background outline-none"
+                      >
+                        {statusFlow.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
                     </div>
                   </div>
                 )}
@@ -168,23 +346,37 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filtered.map((o) => (
-                <tr key={o.id} className="hover:bg-secondary/50 transition-colors">
-                  <td className="px-3 py-3 font-medium">{o.id}</td>
-                  <td className="px-3 py-3">
-                    <div>{o.customer}</div>
-                    <div className="text-xs text-muted-foreground">{o.email}</div>
-                  </td>
-                  <td className="px-3 py-3 text-right">{o.items}</td>
-                  <td className="px-3 py-3 text-right font-medium">{o.total}</td>
-                  <td className="px-3 py-3 text-muted-foreground">{o.payment}</td>
-                  <td className="px-3 py-3"><span className={statusStyles[o.status]}>{o.status}</span></td>
-                  <td className="px-3 py-3 text-muted-foreground">{o.date}</td>
-                  <td className="px-3 py-3 text-right">
-                    <button className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="View"><Eye className="h-4 w-4" /></button>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((o) => {
+                const status = getStatus(o.id, o.status);
+                return (
+                  <tr key={o.id} className="hover:bg-secondary/50 transition-colors">
+                    <td className="px-3 py-3 font-medium">{o.id}</td>
+                    <td className="px-3 py-3">
+                      <div>{o.customer}</div>
+                      <div className="text-xs text-muted-foreground">{o.email}</div>
+                    </td>
+                    <td className="px-3 py-3 text-right">{o.items}</td>
+                    <td className="px-3 py-3 text-right font-medium">C${o.total.toFixed(2)}</td>
+                    <td className="px-3 py-3 text-muted-foreground">{o.payment}</td>
+                    <td className="px-3 py-3">
+                      <select
+                        value={status}
+                        onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                        className={`border-0 bg-transparent text-xs font-medium cursor-pointer outline-none ${
+                          status === "completed" ? "text-success" : status === "pending" ? "text-warning" : "text-info"
+                        }`}
+                      >
+                        {statusFlow.map(s => <option key={s} value={s}>{s}</option>)}
+                        <option value="cancelled">cancelled</option>
+                      </select>
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">{o.date}</td>
+                    <td className="px-3 py-3 text-right">
+                      <button onClick={() => setSelectedOrder(o)} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="View Details"><Eye className="h-4 w-4" /></button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
