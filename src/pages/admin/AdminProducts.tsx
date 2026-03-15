@@ -98,9 +98,12 @@ export default function AdminProducts() {
                       <span className="text-muted-foreground">Stock</span>
                       <span className={product.stock < 50 ? "text-warning font-medium" : ""}>{product.stock}</span>
                     </div>
-                    <div className="flex gap-2 pt-2">
+                     <div className="flex gap-2 pt-2">
                       <Link to={`/product/${product.slug}`} className="flex-1 text-xs py-1.5 border border-border rounded-sm hover:bg-secondary transition-colors flex items-center justify-center gap-1">
                         <Eye className="h-3 w-3" /> View
+                      </Link>
+                      <Link to={`/admin/products/${product.id}/logs`} className="flex-1 text-xs py-1.5 border border-border rounded-sm hover:bg-secondary transition-colors flex items-center justify-center gap-1">
+                        <ClipboardList className="h-3 w-3" /> Logs
                       </Link>
                       <Link to={`/admin/products/${product.id}`} className="flex-1 text-xs py-1.5 btn-accent rounded-sm flex items-center justify-center gap-1">
                         <Edit className="h-3 w-3" /> Edit
