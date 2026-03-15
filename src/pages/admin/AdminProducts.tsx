@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Edit, Trash2, Copy, Eye, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Copy, Eye, X, ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { products, categories } from "@/config/products";
 
 const statusStyles: Record<string, string> = {
@@ -98,9 +98,12 @@ export default function AdminProducts() {
                       <span className="text-muted-foreground">Stock</span>
                       <span className={product.stock < 50 ? "text-warning font-medium" : ""}>{product.stock}</span>
                     </div>
-                    <div className="flex gap-2 pt-2">
+                     <div className="flex gap-2 pt-2">
                       <Link to={`/product/${product.slug}`} className="flex-1 text-xs py-1.5 border border-border rounded-sm hover:bg-secondary transition-colors flex items-center justify-center gap-1">
                         <Eye className="h-3 w-3" /> View
+                      </Link>
+                      <Link to={`/admin/products/${product.id}/logs`} className="flex-1 text-xs py-1.5 border border-border rounded-sm hover:bg-secondary transition-colors flex items-center justify-center gap-1">
+                        <ClipboardList className="h-3 w-3" /> Logs
                       </Link>
                       <Link to={`/admin/products/${product.id}`} className="flex-1 text-xs py-1.5 btn-accent rounded-sm flex items-center justify-center gap-1">
                         <Edit className="h-3 w-3" /> Edit
@@ -150,6 +153,9 @@ export default function AdminProducts() {
                     <div className="flex items-center justify-end gap-1">
                       <Link to={`/product/${product.slug}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="View">
                         <Eye className="h-4 w-4" />
+                      </Link>
+                      <Link to={`/admin/products/${product.id}/logs`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Stock Logs">
+                        <ClipboardList className="h-4 w-4" />
                       </Link>
                       <Link to={`/admin/products/${product.id}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Edit">
                         <Edit className="h-4 w-4" />
