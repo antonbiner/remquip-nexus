@@ -154,6 +154,9 @@ export default function AdminProducts() {
                       <Link to={`/product/${product.slug}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="View">
                         <Eye className="h-4 w-4" />
                       </Link>
+                      <Link to={`/admin/products/${product.id}/logs`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Stock Logs">
+                        <ClipboardList className="h-4 w-4" />
+                      </Link>
                       <Link to={`/admin/products/${product.id}`} className="p-1.5 hover:bg-secondary rounded-sm transition-colors" title="Edit">
                         <Edit className="h-4 w-4" />
                       </Link>
