@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, Edit, Trash2, Copy, Eye, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Copy, Eye, X, ChevronDown, ChevronUp, ClipboardList } from "lucide-react";
 import { products, categories } from "@/config/products";
 
 const statusStyles: Record<string, string> = {
