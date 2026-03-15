@@ -34,6 +34,7 @@ const AdminCMS = lazy(() => import("@/pages/admin/AdminCMS"));
 const AdminAnalytics = lazy(() => import("@/pages/admin/AdminAnalytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
 const AdminProductLogs = lazy(() => import("@/pages/admin/AdminProductLogs"));
+const AdminDiscounts = lazy(() => import("@/pages/admin/AdminDiscounts"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
