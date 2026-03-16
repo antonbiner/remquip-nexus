@@ -12,6 +12,7 @@ import PublicLayout from "@/components/layout/PublicLayout";
 
 // Lazy-loaded routes
 const HomePage = lazy(() => import("@/pages/HomePage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const ProductsPage = lazy(() => import("@/pages/ProductsPage"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
 const CartPage = lazy(() => import("@/pages/CartPage"));
@@ -78,7 +79,7 @@ const App = () => (
                       <Route path="/shipping" element={<LegalPage titleKey="legal.shipping.title" contentKey="legal.shipping.content" />} />
                       <Route path="/refund" element={<LegalPage titleKey="legal.refund.title" contentKey="legal.refund.content" />} />
                       <Route path="/cookie" element={<LegalPage titleKey="legal.cookie.title" contentKey="legal.cookie.content" />} />
-                      <Route path="/about" element={<LegalPage titleKey="legal.about.title" contentKey="legal.about.content" />} />
+                      <Route path="/about" element={<AboutPage />} />
                     </Route>
 
                     {/* Admin */}
