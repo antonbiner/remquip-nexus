@@ -12,6 +12,7 @@ import PublicLayout from "@/components/layout/PublicLayout";
 
 // Lazy-loaded routes
 const HomePage = lazy(() => import("@/pages/HomePage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const ProductsPage = lazy(() => import("@/pages/ProductsPage"));
 const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
 const CartPage = lazy(() => import("@/pages/CartPage"));
