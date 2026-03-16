@@ -79,7 +79,7 @@ const App = () => (
                       <Route path="/shipping" element={<LegalPage titleKey="legal.shipping.title" contentKey="legal.shipping.content" />} />
                       <Route path="/refund" element={<LegalPage titleKey="legal.refund.title" contentKey="legal.refund.content" />} />
                       <Route path="/cookie" element={<LegalPage titleKey="legal.cookie.title" contentKey="legal.cookie.content" />} />
-                      <Route path="/about" element={<LegalPage titleKey="legal.about.title" contentKey="legal.about.content" />} />
+                      <Route path="/about" element={<AboutPage />} />
                     </Route>
 
                     {/* Admin */}
