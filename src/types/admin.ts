@@ -234,6 +234,72 @@ export interface StockLog {
   balanceAfter: number;
 }
 
+// ─── RETURNS / RMA TYPES ───
+
+export type ReturnStatus = "requested" | "approved" | "received" | "processing" | "completed" | "rejected";
+export type ReturnReason = "defective" | "wrong_item" | "damaged_shipping" | "not_as_described" | "changed_mind" | "other";
+export type ReturnResolution = "refund" | "replacement" | "store_credit" | "repair";
+
+export interface ReturnItem {
+  id: string;
+  returnId: string;
+  orderItemId: string;
+  productId: string;
+  sku: string;
+  productName: string;
+  productImage?: string;
+  quantity: number;
+  unitPrice: number;
+  reason: ReturnReason;
+  condition: "unopened" | "opened" | "damaged" | "defective";
+  notes?: string;
+}
+
+export interface ReturnNote {
+  id: string;
+  returnId: string;
+  date: string;
+  user: string;
+  text: string;
+  type: "note" | "status_change" | "system";
+}
+
+export interface Return {
+  id: string;
+  returnNumber: string;
+  orderId: string;
+  orderNumber: string;
+  customerId: string;
+  status: ReturnStatus;
+  reason: ReturnReason;
+  resolution?: ReturnResolution;
+  items: ReturnItem[];
+  subtotal: number;
+  refundAmount?: number;
+  creditAmount?: number;
+  notes: ReturnNote[];
+  requestedAt: string;
+  approvedAt?: string;
+  receivedAt?: string;
+  completedAt?: string;
+  trackingNumber?: string;
+  carrier?: string;
+  warehouseId?: string;
+  processedBy?: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReturnFilters {
+  search?: string;
+  status?: ReturnStatus;
+  reason?: ReturnReason;
+  customerId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 // ─── ACTIVITY TIMELINE ───
 
 export type ActivityType = 
