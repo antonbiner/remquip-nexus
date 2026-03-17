@@ -6,8 +6,8 @@ import {
   Download, ExternalLink, User, FileText
 } from "lucide-react";
 import { products } from "@/config/products";
-import { mockOrders } from "@/data/mockOrders";
-import { mockCustomers } from "@/data/mockCustomers";
+import { orders } from "@/data/mockOrders";
+import { customers } from "@/data/mockCustomers";
 
 type LogType = "in" | "out" | "transfer" | "adjustment" | "return";
 
@@ -37,7 +37,7 @@ const logTypeConfig: Record<LogType, { label: string; icon: React.ElementType; c
 
 function generateLogs(productId: string, currentStock: number): StockLog[] {
   // Get real orders that contain this product (simulated)
-  const productOrders = mockOrders.slice(0, 5);
+  const productOrders = orders.slice(0, 5);
   
   const refs: Array<{
     type: LogType;
@@ -52,7 +52,7 @@ function generateLogs(productId: string, currentStock: number): StockLog[] {
   
   // Add real order references
   productOrders.forEach((order, idx) => {
-    const customer = mockCustomers.find(c => c.id === order.customerId);
+    const customer = customers.find(c => c.id === order.customerId);
     refs.push({
       type: "out" as LogType,
       ref: order.orderNumber,
