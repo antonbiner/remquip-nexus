@@ -36,6 +36,7 @@ const AdminAnalytics = lazy(() => import("@/pages/admin/AdminAnalytics"));
 const AdminSettings = lazy(() => import("@/pages/admin/AdminSettings"));
 const AdminProductLogs = lazy(() => import("@/pages/admin/AdminProductLogs"));
 const AdminDiscounts = lazy(() => import("@/pages/admin/AdminDiscounts"));
+const AdminCustomerDetail = lazy(() => import("@/pages/admin/AdminCustomerDetail"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => (
                       <Route path="inventory" element={<AdminInventory />} />
                       <Route path="orders" element={<AdminOrders />} />
                       <Route path="customers" element={<AdminCustomers />} />
+                      <Route path="customers/:customerId" element={<AdminCustomerDetail />} />
                       <Route path="cms" element={<AdminCMS />} />
                       <Route path="discounts" element={<AdminDiscounts />} />
                       <Route path="analytics" element={<AdminAnalytics />} />
