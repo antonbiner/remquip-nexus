@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { 
-  ArrowLeft, Save, Trash2, Plus, GripVertical, Eye, 
+  ArrowLeft, Save, Trash2, Eye, 
   TrendingUp, Users, DollarSign, Package, ShoppingBag,
   Calendar, Clock, ChevronDown, ChevronUp, ExternalLink,
   BarChart3, History, User
 } from "lucide-react";
 import { products, categories, type Product } from "@/config/products";
 import { getProductBuyers, getProductSalesStats, getProductActivityLogs } from "@/data/mockProducts";
+import ProductImageManager, { type ProductImage } from "@/components/admin/ProductImageManager";
 import type { ProductBuyer, ProductSalesStats, ProductActivityLog } from "@/types/admin";
 
 // ─── STYLE MAPPINGS ───
@@ -71,6 +72,20 @@ export default function AdminProductEdit() {
     (form.compatibility || []).join(", ")
   );
   const [expandedBuyer, setExpandedBuyer] = useState<string | null>(null);
+  
+  // Initialize product images from existing product or empty
+  const [productImages, setProductImages] = useState<ProductImage[]>(() => {
+    if (existing?.images) {
+      return existing.images.map((img, index) => ({
+        id: img.id,
+        url: img.url,
+        alt: img.alt || existing.name || "Product image",
+        isPrimary: index === 0,
+        order: index,
+      }));
+    }
+    return [];
+  });
 
   // Get product data
   const buyers = useMemo(() => productId ? getProductBuyers(productId) : [], [productId]);
@@ -248,27 +263,11 @@ export default function AdminProductEdit() {
             {/* Images */}
             <div className="dashboard-card space-y-4">
               <h3 className="font-display font-bold text-sm uppercase text-muted-foreground">Product Images</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {(existing?.images || []).map((img, i) => (
-                  <div key={img.id} className="aspect-square bg-secondary rounded-sm overflow-hidden relative group">
-                    <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center gap-1">
-                      <button className="opacity-0 group-hover:opacity-100 p-1 bg-background rounded-sm" title="Reorder">
-                        <GripVertical className="h-4 w-4" />
-                      </button>
-                      <button className="opacity-0 group-hover:opacity-100 p-1 bg-background rounded-sm text-destructive" title="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    {i === 0 && <span className="absolute bottom-1 left-1 text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded-sm font-medium">Primary</span>}
-                  </div>
-                ))}
-                <button className="aspect-square border-2 border-dashed border-border rounded-sm flex flex-col items-center justify-center text-muted-foreground hover:border-accent hover:text-accent transition-colors">
-                  <Plus className="h-6 w-6" />
-                  <span className="text-xs mt-1">Add</span>
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">Drag to reorder. First image is the primary product image.</p>
+              <ProductImageManager
+                images={productImages}
+                onChange={setProductImages}
+                maxImages={10}
+              />
             </div>
           </div>
 
