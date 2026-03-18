@@ -183,23 +183,20 @@ export default function HomePage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               {featuredProducts.map((product) => (
                 <motion.div key={product.id} variants={fadeUp}>
-                  <div className="bg-card border border-border rounded-sm overflow-hidden group h-full flex flex-col">
-                    <Link to={`/product/${product.slug}`} className="block aspect-square overflow-hidden bg-secondary">
+                  <Link to={`/product/${product.slug}`} className="bg-card border border-border rounded-sm overflow-hidden group h-full flex flex-col hover:border-accent/50 transition-colors cursor-pointer block">
+                    <div className="block aspect-square overflow-hidden bg-secondary">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
                         loading="lazy"
                       />
-                    </Link>
+                    </div>
                     <div className="p-3 sm:p-4 flex flex-col flex-1">
                       <p className="text-[11px] text-muted-foreground font-mono tracking-wide">{product.sku}</p>
-                      <Link
-                        to={`/product/${product.slug}`}
-                        className="text-sm font-medium text-foreground hover:text-accent transition-colors line-clamp-2 mt-1 mb-auto leading-snug"
-                      >
+                      <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors line-clamp-2 mt-1 mb-auto leading-snug">
                         {product.name}
-                      </Link>
+                      </span>
                       <div className="mt-3 pt-3 border-t border-border">
                         <div className="flex items-center justify-between mb-2.5">
                           <p className="text-base font-bold text-foreground">{formatPrice(product.price)}</p>
@@ -211,14 +208,18 @@ export default function HomePage() {
                           )}
                         </div>
                         <button
-                          onClick={() => addItem(product)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addItem(product);
+                          }}
                           className="w-full btn-accent text-xs py-2 rounded-sm font-semibold uppercase tracking-wide"
                         >
                           {t("products.add_to_cart")}
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
