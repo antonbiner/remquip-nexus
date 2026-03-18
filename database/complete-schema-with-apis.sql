@@ -905,6 +905,304 @@ ON CONFLICT (slug) DO NOTHING;
 
 
 -- ====================================================================================
+-- 17. CUSTOMER ACCOUNTS & AUTHENTICATION
+-- ====================================================================================
+-- Stores customer/client accounts for the public side of the application
+--
+-- API ENDPOINTS NEEDED:
+--   POST   /api/auth/register              - Register new customer account
+--   POST   /api/auth/login                 - Login customer (returns JWT token)
+--   POST   /api/auth/logout                - Logout customer
+--   POST   /api/auth/refresh-token         - Refresh JWT token
+--   POST   /api/auth/forgot-password       - Send password reset email
+--   POST   /api/auth/reset-password        - Reset password with token
+--   GET    /api/customers/me               - Get current customer profile
+--   PATCH  /api/customers/me               - Update current customer profile
+--   PUT    /api/customers/me/avatar        - Upload/update avatar
+--   PATCH  /api/customers/me/password      - Change password (old password required)
+--   DELETE /api/customers/me               - Delete account (soft delete)
+--
+-- VALIDATION:
+--   - Email must be unique and valid format
+--   - Password min 8 characters, must contain uppercase, lowercase, number
+--   - First name and last name required, min 2 characters
+--   - Phone optional but must be valid format
+--   - Company optional but max 255 characters
+--
+
+CREATE TABLE customers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  company_name VARCHAR(255),
+  phone VARCHAR(20),
+  avatar_url TEXT,
+  status VARCHAR(50) NOT NULL DEFAULT 'active', -- active, inactive, suspended
+  email_verified BOOLEAN DEFAULT false,
+  email_verified_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_login TIMESTAMP,
+  CONSTRAINT valid_status CHECK (status IN ('active', 'inactive', 'suspended'))
+);
+
+CREATE INDEX idx_customers_email ON customers(email);
+CREATE INDEX idx_customers_status ON customers(status);
+CREATE INDEX idx_customers_created_at ON customers(created_at);
+CREATE INDEX idx_customers_email_verified ON customers(email_verified);
+
+
+-- ====================================================================================
+-- 18. CUSTOMER ADDRESSES
+-- ====================================================================================
+-- Stores delivery and billing addresses for customers
+--
+-- API ENDPOINTS NEEDED:
+--   POST   /api/customers/addresses        - Create new address
+--   GET    /api/customers/addresses        - List customer addresses
+--   GET    /api/customers/addresses/:id    - Get single address
+--   PATCH  /api/customers/addresses/:id    - Update address
+--   DELETE /api/customers/addresses/:id    - Delete address
+--   POST   /api/customers/addresses/:id/default - Set as default address
+--
+-- VALIDATION:
+--   - Street address required, max 255 characters
+--   - City required, max 100 characters
+--   - Province/state required, max 100 characters
+--   - Postal/zip code required, format validation by country
+--   - Country required
+--   - Customers should have at least one address on first order
+--
+
+CREATE TABLE customer_addresses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  label VARCHAR(50), -- e.g., "Home", "Work", "Warehouse"
+  street_address VARCHAR(255) NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  province_state VARCHAR(100) NOT NULL,
+  postal_zip_code VARCHAR(20) NOT NULL,
+  country VARCHAR(100) NOT NULL DEFAULT 'Canada',
+  is_default BOOLEAN DEFAULT false,
+  is_billing BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_customer_addresses_customer_id ON customer_addresses(customer_id);
+CREATE INDEX idx_customer_addresses_is_default ON customer_addresses(is_default);
+CREATE UNIQUE INDEX idx_customer_default_address ON customer_addresses(customer_id) WHERE is_default = true;
+
+
+-- ====================================================================================
+-- 19. CUSTOMER ORDERS (Link to orders table)
+-- ====================================================================================
+-- Customer order history with personalized information
+-- Links to the main orders table but includes customer-specific context
+--
+-- API ENDPOINTS NEEDED:
+--   GET    /api/customers/orders           - Get customer order history (paginated)
+--   GET    /api/customers/orders/:orderId  - Get single order details
+--   GET    /api/customers/orders/:orderId/tracking - Get tracking info
+--   POST   /api/customers/orders/:orderId/cancel - Request order cancellation
+--   GET    /api/customers/orders/:orderId/invoice - Download invoice
+--   GET    /api/customers/orders/:orderId/shipment - Get shipment details
+--
+-- FEATURES:
+--   - View all personal orders
+--   - Track order status in real-time
+--   - See estimated delivery dates
+--   - Download invoices
+--   - See order history and repeat orders
+--
+
+-- The customer_orders view is created from the orders table:
+CREATE VIEW customer_orders AS
+SELECT 
+  o.id,
+  o.customer_id,
+  o.order_number,
+  o.status,
+  o.total_amount,
+  o.tax_amount,
+  o.shipping_cost,
+  o.subtotal,
+  o.created_at,
+  o.updated_at,
+  o.tracking_number,
+  o.carrier,
+  o.estimated_delivery,
+  o.notes,
+  COUNT(oi.id) as items_count,
+  SUM(oi.quantity) as total_quantity
+FROM orders o
+LEFT JOIN order_items oi ON o.id = oi.order_id
+GROUP BY o.id;
+
+
+-- ====================================================================================
+-- 20. CUSTOMER ACCOUNT PREFERENCES
+-- ====================================================================================
+-- Stores customer preferences like newsletter subscription, notifications, etc.
+--
+-- API ENDPOINTS NEEDED:
+--   GET    /api/customers/preferences      - Get customer preferences
+--   PATCH  /api/customers/preferences      - Update preferences
+--
+-- FEATURES:
+--   - Email notifications (orders, promotions, newsletter)
+--   - Language preference
+--   - Currency preference
+--   - Privacy settings
+--
+
+CREATE TABLE customer_preferences (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL UNIQUE REFERENCES customers(id) ON DELETE CASCADE,
+  newsletter_subscribed BOOLEAN DEFAULT false,
+  order_updates BOOLEAN DEFAULT true,
+  promotional_emails BOOLEAN DEFAULT true,
+  sms_notifications BOOLEAN DEFAULT false,
+  preferred_language VARCHAR(10) DEFAULT 'en', -- en, fr
+  preferred_currency VARCHAR(10) DEFAULT 'CAD', -- CAD, USD
+  two_factor_enabled BOOLEAN DEFAULT false,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_customer_preferences_customer_id ON customer_preferences(customer_id);
+
+
+-- ====================================================================================
+-- 21. CUSTOMER ORDER TRACKING
+-- ====================================================================================
+-- Detailed tracking history for orders
+--
+-- API ENDPOINTS NEEDED:
+--   GET    /api/customers/orders/:orderId/timeline - Get order timeline
+--   GET    /api/customers/orders/:orderId/events   - Get tracking events
+--
+-- FEATURES:
+--   - Track order from pending to delivered
+--   - See timestamp of each status change
+--   - Get carrier tracking info
+--   - Receive notifications on status changes
+--
+
+CREATE TABLE order_tracking_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  status VARCHAR(50) NOT NULL,
+  message TEXT,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  location VARCHAR(255),
+  carrier_tracking_number VARCHAR(100)
+);
+
+CREATE INDEX idx_order_tracking_order_id ON order_tracking_events(order_id);
+CREATE INDEX idx_order_tracking_timestamp ON order_tracking_events(timestamp);
+
+
+-- ====================================================================================
+-- 22. PASSWORD RESET TOKENS
+-- ====================================================================================
+-- Temporary tokens for password reset functionality
+--
+-- API ENDPOINTS NEEDED:
+--   POST   /api/auth/forgot-password       - Generate reset token
+--   POST   /api/auth/reset-password        - Reset password with token
+--   DELETE /api/auth/reset-tokens/:token   - Invalidate token (used or expired)
+--
+
+CREATE TABLE password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_password_reset_customer_id ON password_reset_tokens(customer_id);
+CREATE INDEX idx_password_reset_token ON password_reset_tokens(token);
+CREATE INDEX idx_password_reset_expires ON password_reset_tokens(expires_at);
+
+
+-- ====================================================================================
+-- 23. EMAIL VERIFICATION TOKENS
+-- ====================================================================================
+-- Tokens for email verification on registration
+--
+-- API ENDPOINTS NEEDED:
+--   POST   /api/auth/verify-email         - Verify email with token
+--   POST   /api/auth/resend-verification  - Resend verification email
+--
+
+CREATE TABLE email_verification_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  token VARCHAR(255) UNIQUE NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_email_verification_customer_id ON email_verification_tokens(customer_id);
+CREATE INDEX idx_email_verification_token ON email_verification_tokens(token);
+
+
+-- ====================================================================================
+-- 24. CUSTOMER WISHLIST/SAVED PRODUCTS
+-- ====================================================================================
+-- Allows customers to save favorite products
+--
+-- API ENDPOINTS NEEDED:
+--   GET    /api/customers/wishlist        - Get customer wishlist
+--   POST   /api/customers/wishlist        - Add product to wishlist
+--   DELETE /api/customers/wishlist/:productId - Remove from wishlist
+--   GET    /api/customers/wishlist/count  - Get wishlist count
+--
+
+CREATE TABLE customer_wishlist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(customer_id, product_id)
+);
+
+CREATE INDEX idx_customer_wishlist_customer_id ON customer_wishlist(customer_id);
+CREATE INDEX idx_customer_wishlist_product_id ON customer_wishlist(product_id);
+
+
+-- ====================================================================================
+-- 25. CUSTOMER SESSION TOKENS
+-- ====================================================================================
+-- JWT tokens for customer sessions (optional - can use standard JWT)
+--
+-- API ENDPOINTS NEEDED:
+--   POST   /api/auth/login                - Create session token
+--   DELETE /api/auth/logout               - Invalidate session token
+--   POST   /api/auth/refresh-token        - Refresh token
+--
+
+CREATE TABLE customer_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  token VARCHAR(500) NOT NULL,
+  refresh_token VARCHAR(500),
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ip_address VARCHAR(50),
+  user_agent TEXT
+);
+
+CREATE INDEX idx_customer_sessions_customer_id ON customer_sessions(customer_id);
+CREATE INDEX idx_customer_sessions_token ON customer_sessions(token);
+CREATE INDEX idx_customer_sessions_expires ON customer_sessions(expires_at);
+
+
+-- ====================================================================================
 -- END OF DATABASE SCHEMA
 -- ====================================================================================
 -- 
