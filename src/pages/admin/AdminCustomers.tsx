@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Eye, Search, X, Mail, Phone, ChevronDown, ChevronUp, ArrowLeft, ShoppingBag, MapPin, FileText, Tag, Edit, Ban, CheckCircle } from "lucide-react";
+import { Eye, Search, X, Mail, Phone, ChevronDown, ChevronUp, ArrowLeft, ShoppingBag, MapPin, FileText, Tag, Edit, Ban, CheckCircle, Plus } from "lucide-react";
 
 const customers = [
   { id: "cust-1", company: "Groupe Transport Lévis", name: "Jean-Pierre Lavoie", email: "jp@gtl.ca", phone: "+1 418 555 0101", orders: 12, totalSpent: 28400, lastOrder: "2026-03-10", type: "Wholesale", status: "active", joined: "2025-06-15",
@@ -66,6 +66,19 @@ export default function AdminCustomers() {
   const [expandedCustomer, setExpandedCustomer] = useState<string | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<typeof customers[0] | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    company: "",
+    name: "",
+    email: "",
+    phone: "",
+    type: "Fleet",
+    street: "",
+    city: "",
+    province: "QC",
+    postal: "",
+    taxId: "",
+  });
 
   const filtered = customers.filter((c) => {
     const matchesSearch = !search || c.company.toLowerCase().includes(search.toLowerCase()) || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase());
@@ -201,10 +214,177 @@ export default function AdminCustomers() {
     );
   }
 
+  // ── Create Modal ──
+  if (showCreateModal) {
+    return (
+      <div className="space-y-6">
+        <button onClick={() => setShowCreateModal(false)} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+          <ArrowLeft className="h-4 w-4" /> Back to Customers
+        </button>
+
+        <div className="dashboard-card max-w-2xl">
+          <h2 className="font-display font-bold text-lg md:text-xl mb-6">Create New Customer</h2>
+
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            // Handle form submission - will connect to backend
+            console.log("[v0] Create customer:", newCustomer);
+            setNewCustomer({ company: "", name: "", email: "", phone: "", type: "Fleet", street: "", city: "", province: "QC", postal: "", taxId: "" });
+            setShowCreateModal(false);
+          }} className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Company Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomer.company}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, company: e.target.value })}
+                  placeholder="e.g., Acme Transport"
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Contact Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomer.name}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                  placeholder="e.g., John Smith"
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Email *</label>
+                <input
+                  type="email"
+                  required
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                  placeholder="e.g., john@acme.com"
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Phone</label>
+                <input
+                  type="tel"
+                  value={newCustomer.phone}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                  placeholder="e.g., +1 (555) 000-0000"
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Customer Type *</label>
+                <select
+                  value={newCustomer.type}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, type: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <option value="Fleet">Fleet</option>
+                  <option value="Wholesale">Wholesale</option>
+                  <option value="Distributor">Distributor</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Tax ID</label>
+                <input
+                  type="text"
+                  value={newCustomer.taxId}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, taxId: e.target.value })}
+                  placeholder="e.g., QC-12345678"
+                  className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-border pt-6">
+              <h3 className="font-medium mb-4 flex items-center gap-1.5"><MapPin className="h-4 w-4" /> Address</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1.5">Street Address</label>
+                  <input
+                    type="text"
+                    value={newCustomer.street}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, street: e.target.value })}
+                    placeholder="e.g., 123 Industrial Way"
+                    className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">City</label>
+                  <input
+                    type="text"
+                    value={newCustomer.city}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
+                    placeholder="e.g., Toronto"
+                    className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Province</label>
+                  <select
+                    value={newCustomer.province}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, province: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                  >
+                    <option value="ON">Ontario (ON)</option>
+                    <option value="QC">Quebec (QC)</option>
+                    <option value="BC">British Columbia (BC)</option>
+                    <option value="AB">Alberta (AB)</option>
+                    <option value="MB">Manitoba (MB)</option>
+                    <option value="SK">Saskatchewan (SK)</option>
+                    <option value="NS">Nova Scotia (NS)</option>
+                    <option value="NB">New Brunswick (NB)</option>
+                    <option value="PE">Prince Edward Island (PE)</option>
+                    <option value="NL">Newfoundland (NL)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1.5">Postal Code</label>
+                  <input
+                    type="text"
+                    value={newCustomer.postal}
+                    onChange={(e) => setNewCustomer({ ...newCustomer, postal: e.target.value })}
+                    placeholder="e.g., M3J 2P1"
+                    className="w-full px-3 py-2 border border-border rounded-sm text-sm bg-background outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <button type="submit" className="btn-accent px-6 py-2 rounded-sm text-sm font-medium">Create Customer</button>
+              <button type="button" onClick={() => setShowCreateModal(false)} className="px-6 py-2 border border-border rounded-sm text-sm font-medium hover:bg-secondary transition-colors">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   // ── List View ──
   return (
     <div className="space-y-6">
-      <h2 className="font-display font-bold text-lg md:text-xl">Customer CRM</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-display font-bold text-lg md:text-xl">Customer CRM</h2>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="btn-accent px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-1.5"
+        >
+          <Plus className="h-4 w-4" /> New Customer
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <div className="dashboard-card">
