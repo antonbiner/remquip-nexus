@@ -1,0 +1,399 @@
+COMPLETE API ENDPOINTS REFERENCE
+=================================
+
+This document lists ALL API endpoints needed for the complete REMQUIP system,
+as documented in: /database/complete-schema-with-apis.sql
+
+AUTHENTICATION ENDPOINTS (8)
+============================
+
+1. POST /api/auth/register
+   Request: { first_name, last_name, email, password, company_name?, phone? }
+   Response: { user_id, email, token?, created_at }
+   Error: 400 (invalid), 409 (email exists), 500 (server)
+
+2. POST /api/auth/login
+   Request: { email, password }
+   Response: { user_id, token, refresh_token, expires_at }
+   Error: 401 (invalid), 404 (user not found)
+
+3. POST /api/auth/logout
+   Request: { token }
+   Response: { success: true }
+
+4. POST /api/auth/refresh-token
+   Request: { refresh_token }
+   Response: { token, refresh_token, expires_at }
+   Error: 401 (expired/invalid)
+
+5. POST /api/auth/forgot-password
+   Request: { email }
+   Response: { message: "Reset link sent", token_id }
+   Error: 404 (user not found)
+
+6. POST /api/auth/reset-password
+   Request: { token, new_password }
+   Response: { success: true }
+   Error: 400 (invalid token), 401 (expired)
+
+7. POST /api/auth/verify-email
+   Request: { token }
+   Response: { success: true, email_verified }
+   Error: 400 (invalid), 401 (expired)
+
+8. POST /api/auth/resend-verification
+   Request: { email }
+   Response: { message: "Verification sent" }
+   Error: 404 (user not found), 429 (rate limit)
+
+
+CUSTOMER PROFILE ENDPOINTS (10)
+===============================
+
+1. GET /api/customers/me
+   Auth: Required (Bearer token)
+   Response: {
+     id, email, first_name, last_name, company_name, 
+     phone, avatar_url, status, email_verified, created_at, 
+     updated_at, last_login
+   }
+   Error: 401 (unauthorized), 404 (user not found)
+
+2. PATCH /api/customers/me
+   Auth: Required
+   Request: { first_name?, last_name?, company_name?, phone? }
+   Response: { success: true, customer: {...} }
+   Error: 400 (validation), 401 (unauthorized)
+
+3. PUT /api/customers/me/avatar
+   Auth: Required
+   Request: { file: FormData (image) }
+   Response: { avatar_url, updated_at }
+   Error: 400 (invalid file), 413 (too large)
+
+4. PATCH /api/customers/me/password
+   Auth: Required
+   Request: { current_password, new_password }
+   Response: { success: true }
+   Error: 401 (wrong password), 400 (validation)
+
+5. DELETE /api/customers/me
+   Auth: Required
+   Request: { password } (confirmation)
+   Response: { success: true }
+   Error: 401 (wrong password)
+
+6. GET /api/customers/preferences
+   Auth: Required
+   Response: {
+     newsletter_subscribed, order_updates, promotional_emails,
+     sms_notifications, preferred_language, preferred_currency,
+     two_factor_enabled
+   }
+
+7. PATCH /api/customers/preferences
+   Auth: Required
+   Request: { newsletter_subscribed?, order_updates?, promotional_emails?, ... }
+   Response: { success: true, preferences: {...} }
+
+8. GET /api/customers/me/settings
+   Auth: Required
+   Response: { account_type, account_age, total_orders, total_spent }
+
+9. POST /api/customers/me/two-factor-setup
+   Auth: Required
+   Response: { qr_code_url, secret_key }
+
+10. POST /api/customers/me/two-factor-verify
+    Auth: Required
+    Request: { code }
+    Response: { success: true, backup_codes: [] }
+
+
+CUSTOMER ADDRESSES ENDPOINTS (6)
+================================
+
+1. POST /api/customers/addresses
+   Auth: Required
+   Request: {
+     label?, street_address, city, province_state, 
+     postal_zip_code, country, is_default?, is_billing?
+   }
+   Response: { id, customer_id, [...] }
+   Error: 400 (validation), 401 (unauthorized)
+
+2. GET /api/customers/addresses
+   Auth: Required
+   Query: { limit?, offset?, is_default?, is_billing? }
+   Response: { addresses: [...], total_count, page }
+
+3. GET /api/customers/addresses/:id
+   Auth: Required
+   Response: { id, customer_id, [...] }
+   Error: 404 (not found), 403 (forbidden)
+
+4. PATCH /api/customers/addresses/:id
+   Auth: Required
+   Request: { label?, street_address?, city?, ... }
+   Response: { success: true, address: {...} }
+
+5. DELETE /api/customers/addresses/:id
+   Auth: Required
+   Response: { success: true }
+   Error: 404 (not found), 403 (forbidden)
+
+6. POST /api/customers/addresses/:id/default
+   Auth: Required
+   Request: { is_billing?: true }
+   Response: { success: true, address: {...} }
+
+
+CUSTOMER ORDERS ENDPOINTS (6)
+=============================
+
+1. GET /api/customers/orders
+   Auth: Required
+   Query: { limit: 10, offset: 0, status?, sort_by? }
+   Response: {
+     orders: [
+       { id, order_number, status, total_amount, created_at, 
+         items_count, tracking_number, carrier, estimated_delivery }
+     ],
+     total_count, page, pages
+   }
+
+2. GET /api/customers/orders/:orderId
+   Auth: Required
+   Response: {
+     id, order_number, status, total_amount, tax_amount, shipping_cost,
+     subtotal, created_at, updated_at, tracking_number, carrier,
+     estimated_delivery, items: [...], billing_address, shipping_address,
+     payment_method, notes
+   }
+   Error: 404 (not found), 403 (forbidden)
+
+3. GET /api/customers/orders/:orderId/tracking
+   Auth: Required
+   Response: {
+     order_number, status, tracking_number, carrier,
+     estimated_delivery, last_update, events: [
+       { status, timestamp, location, message }
+     ]
+   }
+
+4. GET /api/customers/orders/:orderId/timeline
+   Auth: Required
+   Response: {
+     events: [
+       { status, date, message, location }
+     ]
+   }
+
+5. GET /api/customers/orders/:orderId/invoice
+   Auth: Required
+   Response: { pdf_url } or PDF binary (download)
+   Error: 404 (not found), 403 (forbidden)
+
+6. POST /api/customers/orders/:orderId/cancel
+   Auth: Required
+   Request: { reason? }
+   Response: { success: true, status: "cancelled" }
+   Error: 400 (cannot cancel), 404 (not found)
+
+
+CUSTOMER WISHLIST ENDPOINTS (4)
+===============================
+
+1. GET /api/customers/wishlist
+   Auth: Required
+   Query: { limit?, offset? }
+   Response: { products: [...], total_count }
+
+2. POST /api/customers/wishlist
+   Auth: Required
+   Request: { product_id }
+   Response: { success: true, id }
+   Error: 409 (already wishlisted)
+
+3. DELETE /api/customers/wishlist/:productId
+   Auth: Required
+   Response: { success: true }
+
+4. GET /api/customers/wishlist/count
+   Auth: Required
+   Response: { count }
+
+
+ADMIN USER MANAGEMENT ENDPOINTS (15)
+====================================
+
+1. GET /api/admin/users
+   Auth: Required (Admin role)
+   Query: { limit?, offset?, role?, status?, search? }
+   Response: { users: [...], total_count }
+
+2. POST /api/admin/users
+   Request: { first_name, last_name, email, role, password }
+   Response: { id, email, [...], created_at }
+
+3. GET /api/admin/users/:id
+   Response: { id, email, [...] }
+
+4. PATCH /api/admin/users/:id
+   Request: { first_name?, last_name?, role?, status?, [...] }
+   Response: { success: true, user: {...} }
+
+5. DELETE /api/admin/users/:id
+   Response: { success: true }
+
+
+ADMIN ACCESS CONTROL ENDPOINTS (13)
+===================================
+
+1. POST /api/admin/access/bulk-assign
+   Request: {
+     user_ids: [...], page_ids: [...],
+     permissions: { can_view, can_edit, can_delete }
+   }
+   Response: { success: true, assignments_created }
+
+2. POST /api/admin/users/:userId/pages/:pageId/access
+3. GET /api/admin/access
+4. PATCH /api/admin/users/:userId/pages/:pageId/access
+5. DELETE /api/admin/users/:userId/pages/:pageId/access
+... (13 endpoints total)
+
+
+PRODUCT MANAGEMENT ENDPOINTS (13)
+=================================
+
+1. GET /api/products
+   Query: { category?, limit?, offset?, sort?, search? }
+   Response: { products: [...], total_count }
+
+2. POST /api/admin/products
+   Request: { name, sku, category_id, price, stock, description, [...] }
+   Response: { id, [...] }
+
+3. GET /api/products/:id
+4. PATCH /api/admin/products/:id
+5. DELETE /api/admin/products/:id
+6. POST /api/admin/products/:id/images
+7. DELETE /api/admin/products/:id/images/:imageId
+8. POST /api/admin/products/:id/variants
+... (13 endpoints total)
+
+
+CUSTOMER (CRM) MANAGEMENT ENDPOINTS (15)
+========================================
+
+1. GET /api/admin/customers
+   Query: { limit?, offset?, status?, type?, search? }
+   Response: { customers: [...], total_count }
+
+2. POST /api/admin/customers
+   Request: { first_name, last_name, email, phone, company, [...] }
+   Response: { id, [...] }
+
+3. GET /api/admin/customers/:id
+4. PATCH /api/admin/customers/:id
+5. DELETE /api/admin/customers/:id
+... (15 endpoints total)
+
+
+ORDER MANAGEMENT ENDPOINTS (25+)
+================================
+
+1. GET /api/admin/orders
+   Query: { status?, limit?, offset?, search? }
+   Response: { orders: [...], total_count }
+
+2. GET /api/admin/orders/:id
+3. PATCH /api/admin/orders/:id
+4. POST /api/admin/orders/:id/shipment
+5. POST /api/admin/orders/:id/tracking
+... (25+ endpoints total)
+
+
+INVENTORY ENDPOINTS (8)
+======================
+
+1. GET /api/admin/inventory
+   Query: { product_id?, location?, low_stock? }
+   Response: { inventory: [...] }
+
+2. PATCH /api/admin/inventory/:id
+   Request: { quantity, operation: "add"|"subtract"|"set" }
+
+3. POST /api/admin/inventory/logs
+4. GET /api/admin/inventory/logs
+... (8 endpoints total)
+
+
+DISCOUNT ENDPOINTS (10)
+======================
+
+1. GET /api/admin/discounts
+2. POST /api/admin/discounts
+3. GET /api/admin/discounts/:id
+4. PATCH /api/admin/discounts/:id
+5. DELETE /api/admin/discounts/:id
+... (10 endpoints total)
+
+
+CMS ENDPOINTS (20+)
+==================
+
+1. GET /api/cms/pages
+2. POST /api/admin/cms/pages
+3. GET /api/cms/pages/:slug
+4. PATCH /api/admin/cms/pages/:id
+5. DELETE /api/admin/cms/pages/:id
+6. POST /api/admin/cms/pages/:id/sections
+... (20+ endpoints total)
+
+
+ANALYTICS ENDPOINTS (8)
+======================
+
+1. GET /api/admin/analytics/overview
+2. GET /api/admin/analytics/revenue
+3. GET /api/admin/analytics/orders
+4. GET /api/admin/analytics/customers
+... (8 endpoints total)
+
+
+TOTAL API ENDPOINTS: 150+
+
+IMPLEMENTATION PRIORITY:
+
+Phase 1 (Essential - Week 1):
+  - Authentication (8 endpoints)
+  - Customer Profile (5 endpoints)
+  - Customer Addresses (6 endpoints)
+  - Customer Orders (6 endpoints)
+  Total: 25 endpoints
+
+Phase 2 (Core Features - Week 2):
+  - Products (13 endpoints)
+  - Customers CRM (15 endpoints)
+  - Inventory (8 endpoints)
+  Total: 36 endpoints
+
+Phase 3 (Advanced - Week 3):
+  - Orders Management (25+ endpoints)
+  - Discounts (10 endpoints)
+  - CMS (20+ endpoints)
+  Total: 55+ endpoints
+
+Phase 4 (Admin Tools - Week 4):
+  - Analytics (8 endpoints)
+  - Access Control (13 endpoints)
+  - User Management (15 endpoints)
+  Total: 36+ endpoints
+
+All endpoint specifications are documented in:
+/database/complete-schema-with-apis.sql
+
+For detailed request/response examples, validation rules,
+and error codes, refer to that file.
