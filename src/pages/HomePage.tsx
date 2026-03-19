@@ -286,6 +286,32 @@ export default function HomePage() {
         </motion.div>
       </section>
 
+      {/* ═══ TRUST & STATS ═══ */}
+      <section className="bg-gradient-to-r from-secondary/40 to-secondary/20 border-y border-border/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+            {[
+              { number: "15K+", label: "Happy Customers" },
+              { number: "500+", label: "Products Available" },
+              { number: "24/7", label: "Customer Support" },
+              { number: "99.8%", label: "On-Time Delivery" },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="text-center"
+              >
+                <p className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-accent mb-2">{stat.number}</p>
+                <p className="text-sm sm:text-base text-muted-foreground font-light">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ WHOLESALE CTA ═══ */}
       <section className="relative overflow-hidden">
         <img

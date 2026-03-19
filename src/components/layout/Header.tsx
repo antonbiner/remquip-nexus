@@ -134,26 +134,39 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 border-b border-border/30 backdrop-blur-sm bg-background/95">
       {/* ── Top bar ── */}
       <div className="nav-bar">
-        <div className="container mx-auto px-4 flex items-center justify-between h-14 md:h-16 gap-3">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 md:h-20 gap-4 md:gap-6">
           {/* Logo */}
-          <Link to="/" className="font-display text-lg md:text-xl font-bold tracking-[0.2em] text-nav-foreground flex-shrink-0">
+          <Link to="/" className="font-display text-xl md:text-2xl font-bold tracking-tight text-foreground flex-shrink-0 hover:text-accent transition-colors">
             REMQUIP
           </Link>
 
+          {/* Desktop navigation - hidden on mobile */}
+          <nav className="hidden lg:flex items-center gap-8 flex-1 ml-8">
+            <Link to="/products" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
+              Products
+            </Link>
+            <Link to="/about" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
+              About
+            </Link>
+            <Link to="/contact" className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors">
+              Contact
+            </Link>
+          </nav>
+
           {/* Desktop search */}
-          <div className="hidden md:flex flex-1 max-w-md mx-4 lg:max-w-lg lg:mx-6" ref={searchRef}>
+          <div className="hidden md:flex flex-1 max-w-md lg:max-w-sm" ref={searchRef}>
             <form onSubmit={handleSearchSubmit} className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                 placeholder={t("nav.search.placeholder")}
-                className="w-full pl-10 pr-4 py-2 rounded-sm bg-background text-foreground text-sm border-0 focus:ring-2 focus:ring-accent outline-none placeholder:text-muted-foreground"
+                className="w-full pl-12 pr-4 py-2.5 rounded-lg bg-secondary/40 hover:bg-secondary/60 border border-border/50 text-foreground text-sm focus:ring-2 focus:ring-accent focus:border-transparent outline-none placeholder:text-muted-foreground transition-colors"
               />
               {showResults && (
                 <div className="absolute top-full left-0 right-0 mt-1.5">
@@ -169,12 +182,12 @@ export default function Header() {
             <div className="relative hidden md:block" ref={langRef}>
               <button
                 onClick={() => { setLangOpen(!langOpen); setCurrOpen(false); }}
-                className="flex items-center gap-1.5 text-sm text-nav-foreground hover:text-nav-accent transition-colors px-2 py-1.5 rounded-sm"
+                className="flex items-center gap-1.5 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-secondary/40"
                 aria-label="Language"
               >
-                <FlagIcon country={langFlag} className="w-5 h-3.5 rounded-[2px] overflow-hidden" />
-                <span className="hidden lg:inline text-xs font-medium">{lang === "en" ? "EN" : "FR"}</span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
+                <FlagIcon country={langFlag} className="w-4 h-3 rounded-[2px] overflow-hidden" />
+                <span className="hidden lg:inline text-xs font-semibold">{lang === "en" ? "EN" : "FR"}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${langOpen ? 'rotate-180' : ''}`} />
               </button>
               {langOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg py-1 min-w-[140px] z-50 animate-fade-in">
@@ -192,12 +205,12 @@ export default function Header() {
             <div className="relative hidden md:block" ref={currRef}>
               <button
                 onClick={() => { setCurrOpen(!currOpen); setLangOpen(false); }}
-                className="flex items-center gap-1.5 text-sm text-nav-foreground hover:text-nav-accent transition-colors px-2 py-1.5 rounded-sm"
+                className="flex items-center gap-1.5 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-secondary/40"
                 aria-label="Currency"
               >
-                <FlagIcon country={currFlag} className="w-5 h-3.5 rounded-[2px] overflow-hidden" />
-                <span className="hidden lg:inline text-xs font-medium">{currency}</span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
+                <FlagIcon country={currFlag} className="w-4 h-3 rounded-[2px] overflow-hidden" />
+                <span className="hidden lg:inline text-xs font-semibold">{currency}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${currOpen ? 'rotate-180' : ''}`} />
               </button>
               {currOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg py-1 min-w-[150px] z-50 animate-fade-in">
@@ -216,14 +229,14 @@ export default function Header() {
             </div>
 
             {/* Account */}
-            <Link to="/login" className="hidden md:flex items-center gap-1.5 text-nav-foreground hover:text-nav-accent transition-colors px-2 py-1.5 rounded-sm" aria-label="Sign in">
-              <User className="h-4.5 w-4.5" />
-              <span className="hidden lg:inline text-xs font-medium">{t("nav.signin")}</span>
+            <Link to="/login" className="hidden md:flex items-center gap-1.5 font-medium text-foreground/70 hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-secondary/40" aria-label="Sign in">
+              <User className="h-5 w-5" />
+              <span className="hidden lg:inline text-xs">{t("nav.signin")}</span>
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="flex items-center text-nav-foreground hover:text-nav-accent transition-colors relative p-1.5 rounded-sm" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
+            <Link to="/cart" className="flex items-center font-medium text-foreground hover:text-foreground transition-colors relative p-2 rounded-lg hover:bg-secondary/40" aria-label="Cart">
+              <ShoppingCart className="h-6 w-6" />
               {itemCount > 0 && (
                 <span
                   className={`absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full h-[18px] min-w-[18px] flex items-center justify-center px-1 leading-none transition-transform ${
@@ -270,8 +283,8 @@ export default function Header() {
 
       {/* ── Mobile menu overlay ── */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background overflow-y-auto animate-fade-in">
-          <div className="px-4 py-4 space-y-4">
+        <div className="md:hidden fixed inset-0 top-16 z-40 bg-background/95 backdrop-blur-sm overflow-y-auto animate-fade-in">
+          <div className="px-4 sm:px-6 py-6 space-y-4">
             {/* Mobile search */}
             <div ref={mobileSearchRef} className="relative">
               <form onSubmit={handleSearchSubmit}>
