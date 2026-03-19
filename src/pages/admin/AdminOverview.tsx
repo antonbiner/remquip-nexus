@@ -52,17 +52,20 @@ export default function AdminOverview() {
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat) => (
-          <div key={stat.label} className="dashboard-card">
-            <div className="flex items-start justify-between">
-              <div className="min-w-0">
-                <p className="text-xs md:text-sm text-muted-foreground truncate">{stat.label}</p>
-                <p className="text-xl md:text-2xl font-bold font-display mt-1">{stat.value}</p>
-                <p className="text-xs text-success flex items-center gap-1 mt-1"><TrendingUp className="h-3 w-3 flex-shrink-0" /><span className="truncate">{stat.change}</span></p>
+          <div key={stat.label} className="bg-card border border-border/50 rounded-lg p-6 hover:border-border transition-all">
+            <div className="flex items-start justify-between mb-4">
+              <div className="p-2.5 rounded-lg bg-accent/10">
+                <stat.icon className={`h-6 w-6 ${stat.color}`} strokeWidth={1.5} />
               </div>
-              <stat.icon className={`h-7 w-7 md:h-8 md:w-8 flex-shrink-0 ${stat.color}`} strokeWidth={1.5} />
+              <div className="flex items-center gap-1 text-xs font-medium text-success">
+                <TrendingUp className="h-3.5 w-3.5" />
+                {stat.change}
+              </div>
             </div>
+            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+            <p className="text-3xl font-bold font-display mt-2 text-foreground">{stat.value}</p>
           </div>
         ))}
       </div>
